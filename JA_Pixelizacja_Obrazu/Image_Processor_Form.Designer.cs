@@ -1,6 +1,6 @@
 ﻿namespace JA_Pixelizacja_Obrazu
 {
-    partial class Form1
+    partial class Image_Processor_Form
     {
         /// <summary>
         /// Required designer variable.
@@ -34,19 +34,24 @@
             this.filePathTextBox = new System.Windows.Forms.TextBox();
             this.browseFilesButton = new System.Windows.Forms.Button();
             this.bindingSource1 = new System.Windows.Forms.BindingSource(this.components);
-            this.pixelNumSpecifier = new System.Windows.Forms.ComboBox();
+            this.pixelNumPicker = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.libraryPicker = new System.Windows.Forms.ComboBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.threadsTrackBar = new System.Windows.Forms.TrackBar();
+            this.threadValueLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.threadsTrackBar)).BeginInit();
             this.SuspendLayout();
             // 
             // processButton
             // 
             this.processButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F);
-            this.processButton.Location = new System.Drawing.Point(995, 523);
+            this.processButton.Location = new System.Drawing.Point(1011, 774);
             this.processButton.Name = "processButton";
             this.processButton.Size = new System.Drawing.Size(127, 53);
             this.processButton.TabIndex = 0;
@@ -58,7 +63,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label1.Location = new System.Drawing.Point(18, 19);
+            this.label1.Location = new System.Drawing.Point(19, 26);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(276, 20);
             this.label1.TabIndex = 1;
@@ -67,14 +72,14 @@
             // 
             // filePathTextBox
             // 
-            this.filePathTextBox.Location = new System.Drawing.Point(329, 19);
+            this.filePathTextBox.Location = new System.Drawing.Point(344, 26);
             this.filePathTextBox.Name = "filePathTextBox";
-            this.filePathTextBox.Size = new System.Drawing.Size(558, 22);
+            this.filePathTextBox.Size = new System.Drawing.Size(673, 22);
             this.filePathTextBox.TabIndex = 2;
             // 
             // browseFilesButton
             // 
-            this.browseFilesButton.Location = new System.Drawing.Point(893, 12);
+            this.browseFilesButton.Location = new System.Drawing.Point(1023, 19);
             this.browseFilesButton.Name = "browseFilesButton";
             this.browseFilesButton.Size = new System.Drawing.Size(115, 37);
             this.browseFilesButton.TabIndex = 3;
@@ -82,21 +87,21 @@
             this.browseFilesButton.UseVisualStyleBackColor = true;
             this.browseFilesButton.Click += new System.EventHandler(this.browseFilesButton_Click);
             // 
-            // pixelNumSpecifier
+            // pixelNumPicker
             // 
-            this.pixelNumSpecifier.FormattingEnabled = true;
-            this.pixelNumSpecifier.Items.AddRange(new object[] {
+            this.pixelNumPicker.FormattingEnabled = true;
+            this.pixelNumPicker.Items.AddRange(new object[] {
             "2",
             "4",
             "8",
             "16",
             "32",
             "64"});
-            this.pixelNumSpecifier.Location = new System.Drawing.Point(338, 95);
-            this.pixelNumSpecifier.Name = "pixelNumSpecifier";
-            this.pixelNumSpecifier.Size = new System.Drawing.Size(68, 24);
-            this.pixelNumSpecifier.TabIndex = 4;
-            this.pixelNumSpecifier.SelectedIndexChanged += new System.EventHandler(this.pixelNumSpecifier_SelectedIndexChanged);
+            this.pixelNumPicker.Location = new System.Drawing.Point(344, 95);
+            this.pixelNumPicker.Name = "pixelNumPicker";
+            this.pixelNumPicker.Size = new System.Drawing.Size(68, 24);
+            this.pixelNumPicker.TabIndex = 4;
+            this.pixelNumPicker.SelectedIndexChanged += new System.EventHandler(this.pixelNumSpecifier_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -112,50 +117,96 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label3.Location = new System.Drawing.Point(432, 96);
+            this.label3.Location = new System.Drawing.Point(19, 141);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(117, 20);
+            this.label3.Size = new System.Drawing.Size(61, 20);
             this.label3.TabIndex = 6;
-            this.label3.Text = "Choose library";
+            this.label3.Text = "Library";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // libraryPicker
             // 
             this.libraryPicker.FormattingEnabled = true;
             this.libraryPicker.Items.AddRange(new object[] {
             "ASM",
-            "C#"});
-            this.libraryPicker.Location = new System.Drawing.Point(578, 95);
+            "C++"});
+            this.libraryPicker.Location = new System.Drawing.Point(344, 141);
             this.libraryPicker.Name = "libraryPicker";
-            this.libraryPicker.Size = new System.Drawing.Size(63, 24);
+            this.libraryPicker.Size = new System.Drawing.Size(68, 24);
             this.libraryPicker.TabIndex = 7;
             // 
             // pictureBox1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(22, 145);
+            this.pictureBox1.Location = new System.Drawing.Point(88, 316);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(957, 431);
             this.pictureBox1.TabIndex = 8;
             this.pictureBox1.TabStop = false;
             // 
-            // Form1
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.label4.Location = new System.Drawing.Point(19, 196);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(70, 20);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "Threads";
+            this.label4.Click += new System.EventHandler(this.label4_Click);
+            // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(0, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(100, 23);
+            this.label5.TabIndex = 0;
+            // 
+            // threadsTrackBar
+            // 
+            this.threadsTrackBar.LargeChange = 8;
+            this.threadsTrackBar.Location = new System.Drawing.Point(344, 187);
+            this.threadsTrackBar.Maximum = 64;
+            this.threadsTrackBar.Minimum = 1;
+            this.threadsTrackBar.Name = "threadsTrackBar";
+            this.threadsTrackBar.Size = new System.Drawing.Size(628, 56);
+            this.threadsTrackBar.TabIndex = 11;
+            this.threadsTrackBar.Value = 1;
+            this.threadsTrackBar.Scroll += new System.EventHandler(this.threadsTrackBar_Scroll);
+            // 
+            // threadValueLabel
+            // 
+            this.threadValueLabel.AutoSize = true;
+            this.threadValueLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.threadValueLabel.Location = new System.Drawing.Point(988, 187);
+            this.threadValueLabel.Name = "threadValueLabel";
+            this.threadValueLabel.Size = new System.Drawing.Size(23, 25);
+            this.threadValueLabel.TabIndex = 12;
+            this.threadValueLabel.Text = "1";
+            // 
+            // Image_Processor_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.ClientSize = new System.Drawing.Size(1134, 588);
+            this.ClientSize = new System.Drawing.Size(1150, 839);
+            this.Controls.Add(this.threadValueLabel);
+            this.Controls.Add(this.threadsTrackBar);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.libraryPicker);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.pixelNumSpecifier);
+            this.Controls.Add(this.pixelNumPicker);
             this.Controls.Add(this.browseFilesButton);
             this.Controls.Add(this.filePathTextBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.processButton);
-            this.Name = "Form1";
-            this.Text = "Form1";
+            this.Name = "Image_Processor_Form";
+            this.Text = "Image Processor";
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.threadsTrackBar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -168,11 +219,15 @@
         private System.Windows.Forms.TextBox filePathTextBox;
         private System.Windows.Forms.Button browseFilesButton;
         private System.Windows.Forms.BindingSource bindingSource1;
-        private System.Windows.Forms.ComboBox pixelNumSpecifier;
+        private System.Windows.Forms.ComboBox pixelNumPicker;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox libraryPicker;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TrackBar threadsTrackBar;
+        private System.Windows.Forms.Label threadValueLabel;
     }
 }
 
