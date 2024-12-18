@@ -7,13 +7,12 @@ using System.Threading.Tasks;
 
 namespace JA_Pixelizacja_Obrazu
 {
-    public delegate int PixelizeLibraryDelegate(
+    public delegate void PixelizeLibraryDelegate(
             IntPtr imageData,         // Pointer to the image pixel data
             int width,                // Width of the image in pixels
             int height,               // Height of the image in pixels
-            int pixelSize             // Size of the pixelization block (e.g., 10 for 10x10)
-        );
-    
+            int pixelSize);           // Size of the pixelization block (e.g., 10 for 10x10)
+
     public static class CPPLibrary
     {
         [DllImport(@"D:\SUT\JA\Projekt SEM5\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingCPP.dll", CallingConvention = CallingConvention.StdCall)]
@@ -22,8 +21,7 @@ namespace JA_Pixelizacja_Obrazu
             IntPtr imageData,
             int width,
             int height,
-            int pixelSize
-        );
+            int pixelSize);
     }
 
     public static class ASMLibrary
@@ -33,7 +31,6 @@ namespace JA_Pixelizacja_Obrazu
             IntPtr imageData,
             int width,
             int height,
-            int pixelSize
-        );
+            int pixelSize);
     }
 }

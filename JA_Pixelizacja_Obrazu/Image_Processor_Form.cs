@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,8 +15,6 @@ namespace JA_Pixelizacja_Obrazu
 {
     public partial class Image_Processor_Form : Form
     {
-        private PixelizeLibraryDelegate libDelegate;
-
         public Image_Processor_Form()
         {
             InitializeComponent();
@@ -24,53 +23,61 @@ namespace JA_Pixelizacja_Obrazu
 
         private void processButton_Click(object sender, EventArgs e)
         {
-            libDelegate = CPPLibrary.sum;
 
-            MessageBox.Show(libDelegate(1, 2).ToString());
+            //Check if a file path is provided
+            if (string.IsNullOrEmpty(filePathTextBox.Text))
+            {
+                MessageBox.Show("Please select an image file");
+                return;
+            }
 
-            //Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new Stopwatch();
 
-            ////Check if a file path is provided
-            //if (string.IsNullOrEmpty(filePathTextBox.Text))
-            //{
-            //    MessageBox.Show("Please select an image file");
-            //    return;
-            //}
+            try
+            {
+                // Load the original image
+                Bitmap originalImage = new Bitmap(filePathTextBox.Text);
 
-            //try
-            //{
-            //    // Load the original image
-            //    Bitmap originalImage = new Bitmap(filePathTextBox.Text);
+                BitmapData originalImageData = originalImage.LockBits(
+                    new Rectangle(0, 0, originalImage.Width, originalImage.Height),
+                    ImageLockMode.ReadWrite, 
+                    originalImage.PixelFormat);
 
-            //    // Get the pixel size from the picker
-            //    int pixelSize = int.Parse(pixelNumPicker.Text);
+                IntPtr originalImagePtr = originalImageData.Scan0;
 
-            //    // Start the timer
-            //    stopwatch.Start();
-            //    // Call the pixelization method
-            //    Bitmap pixelizedImage = ImageProcessing.PixelizeImage(originalImage, pixelSize);
-            //    // Stop the timer
-            //    stopwatch.Stop();
+                // Get the pixel size from the picker
+                int pixelSize = int.Parse(pixelNumPicker.Text);
 
-            //    // Display the result in the PictureBox
-            //    pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-            //    pictureBox1.Image = pixelizedImage;
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Error: {ex.Message}");
-            //}
-            //finally
-            //{
 
-            //    // Display the elapsed time
-            //    MessageBox.Show($"Processing time: {stopwatch.ElapsedMilliseconds} ms");
-            //}
-        }
+                libDelegate = CPPLibrary.pixelizeImage;
 
-        private void label1_Click(object sender, EventArgs e)
-        {
+                // Start the timer
+                stopwatch.Start();
+                // Call the pixelization method
+                //Bitmap pixelizedImage = ImageProcessing.PixelizeImage(originalImage, pixelSize);
+                libDelegate(originalImagePtr, originalImage.Width, originalImage.Height, pixelSize);
+                
+                // Stop the timer
+                stopwatch.Stop();
 
+                originalImage.UnlockBits(originalImageData);
+
+                // Display the result in the PictureBox
+                pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
+                pictureBox1.Image = (Bitmap)originalImage.Clone();
+
+                originalImage.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}");
+            }
+            finally
+            {
+
+                // Display the elapsed time
+                MessageBox.Show($"Processing time: {stopwatch.ElapsedMilliseconds} ms");
+            }
         }
 
         private void browseFilesButton_Click(object sender, EventArgs e)
@@ -84,27 +91,6 @@ namespace JA_Pixelizacja_Obrazu
             {
                 filePathTextBox.Text = openFileDialog.FileName;
             }
-
-        }
-
-        private void pixelNumSpecifier_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void threadsPicker_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void threadsTrackBar_Scroll(object sender, EventArgs e)

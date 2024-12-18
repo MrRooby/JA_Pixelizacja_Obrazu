@@ -10,7 +10,7 @@
 
 extern "C" 
 {
-    IMAGEPROCESSINGCPP_API void pixelizeImage(
+    IMAGEPROCESSINGCPP_API void PixelizeImage(
         unsigned char* imageData, // Pointer to the image pixel data
         int width,                // Width of the image in pixels
         int height,               // Height of the image in pixels

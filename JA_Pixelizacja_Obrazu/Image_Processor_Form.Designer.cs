@@ -68,7 +68,6 @@
             this.label1.Size = new System.Drawing.Size(276, 20);
             this.label1.TabIndex = 1;
             this.label1.Text = "Choose image you want to process:";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // filePathTextBox
             // 
@@ -101,7 +100,6 @@
             this.pixelNumPicker.Name = "pixelNumPicker";
             this.pixelNumPicker.Size = new System.Drawing.Size(68, 24);
             this.pixelNumPicker.TabIndex = 4;
-            this.pixelNumPicker.SelectedIndexChanged += new System.EventHandler(this.pixelNumSpecifier_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -122,7 +120,6 @@
             this.label3.Size = new System.Drawing.Size(61, 20);
             this.label3.TabIndex = 6;
             this.label3.Text = "Library";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // libraryPicker
             // 
@@ -152,7 +149,6 @@
             this.label4.Size = new System.Drawing.Size(70, 20);
             this.label4.TabIndex = 10;
             this.label4.Text = "Threads";
-            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // label5
             // 
