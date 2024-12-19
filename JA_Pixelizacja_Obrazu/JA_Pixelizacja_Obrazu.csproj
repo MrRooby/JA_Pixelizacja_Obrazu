@@ -46,11 +46,13 @@
     <OutputPath>bin\x64\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
+    <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -68,13 +70,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller.cs" />
+    <Compile Include="ImageFileController.cs" />
     <Compile Include="Image_Processor_Form.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Image_Processor_Form.Designer.cs">
       <DependentUpon>Image_Processor_Form.cs</DependentUpon>
     </Compile>
-    <Compile Include="imageProcessing.cs" />
+    <Compile Include="ImageProcessing.cs" />
     <Compile Include="PixelizeLibraryDelegate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

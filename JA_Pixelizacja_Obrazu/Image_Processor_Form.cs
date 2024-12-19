@@ -23,6 +23,8 @@ namespace JA_Pixelizacja_Obrazu
 
         private void processButton_Click(object sender, EventArgs e)
         {
+            // Load the image
+            ImageProcessing imageProcessing = new ImageProcessing();
 
             //Check if a file path is provided
             if (string.IsNullOrEmpty(filePathTextBox.Text))
@@ -31,42 +33,32 @@ namespace JA_Pixelizacja_Obrazu
                 return;
             }
 
-            Stopwatch stopwatch = new Stopwatch();
-
             try
             {
-                // Load the original image
-                Bitmap originalImage = new Bitmap(filePathTextBox.Text);
+                imageProcessing.LoadImage(filePathTextBox.Text);
 
-                BitmapData originalImageData = originalImage.LockBits(
-                    new Rectangle(0, 0, originalImage.Width, originalImage.Height),
-                    ImageLockMode.ReadWrite, 
-                    originalImage.PixelFormat);
-
-                IntPtr originalImagePtr = originalImageData.Scan0;
-
-                // Get the pixel size from the picker
-                int pixelSize = int.Parse(pixelNumPicker.Text);
-
-
-                libDelegate = CPPLibrary.pixelizeImage;
-
-                // Start the timer
-                stopwatch.Start();
-                // Call the pixelization method
-                //Bitmap pixelizedImage = ImageProcessing.PixelizeImage(originalImage, pixelSize);
-                libDelegate(originalImagePtr, originalImage.Width, originalImage.Height, pixelSize);
+                // Choose the processing library
+                imageProcessing.chooseProcessingLibrary(libraryPicker.Text.ToString());
                 
-                // Stop the timer
-                stopwatch.Stop();
+                Bitmap processedImage = imageProcessing.processImage(Int32.Parse(pixelNumPicker.Text));          
 
-                originalImage.UnlockBits(originalImageData);
+                // Display the processed image
+                pictureBoxProcessed.SizeMode = PictureBoxSizeMode.Zoom;
+                pictureBoxProcessed.Image = processedImage;
 
-                // Display the result in the PictureBox
-                pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-                pictureBox1.Image = (Bitmap)originalImage.Clone();
-
-                originalImage.Dispose();
+                // Save the processed image to a file
+                string saveFilePath = "C:/Users/barte/OneDrive/Pulpit/processed/processed_image.jpg";
+                DialogResult result = MessageBox.Show("Do you want to save the processed image?", "Save Image", MessageBoxButtons.YesNo);
+                if (result == DialogResult.Yes)
+                {
+                    processedImage.Save(saveFilePath, ImageFormat.Jpeg);
+                    MessageBox.Show($"Image saved to {saveFilePath}");
+                }
+                else
+                {
+                    MessageBox.Show("Image not saved");
+                }
+                pictureBoxProcessed.Image = processedImage;
             }
             catch (Exception ex)
             {
@@ -74,9 +66,8 @@ namespace JA_Pixelizacja_Obrazu
             }
             finally
             {
-
                 // Display the elapsed time
-                MessageBox.Show($"Processing time: {stopwatch.ElapsedMilliseconds} ms");
+                MessageBox.Show($"Processing time: {imageProcessing.elapsedMilliseconds} ms");
             }
         }
 

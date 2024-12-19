@@ -38,13 +38,13 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.libraryPicker = new System.Windows.Forms.ComboBox();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBoxProcessed = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.threadsTrackBar = new System.Windows.Forms.TrackBar();
             this.threadValueLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProcessed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.threadsTrackBar)).BeginInit();
             this.SuspendLayout();
             // 
@@ -132,13 +132,13 @@
             this.libraryPicker.Size = new System.Drawing.Size(68, 24);
             this.libraryPicker.TabIndex = 7;
             // 
-            // pictureBox1
+            // pictureBoxProcessed
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(88, 316);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(957, 431);
-            this.pictureBox1.TabIndex = 8;
-            this.pictureBox1.TabStop = false;
+            this.pictureBoxProcessed.Location = new System.Drawing.Point(88, 316);
+            this.pictureBoxProcessed.Name = "pictureBoxProcessed";
+            this.pictureBoxProcessed.Size = new System.Drawing.Size(957, 431);
+            this.pictureBoxProcessed.TabIndex = 8;
+            this.pictureBoxProcessed.TabStop = false;
             // 
             // label4
             // 
@@ -175,7 +175,7 @@
             this.threadValueLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.threadValueLabel.Location = new System.Drawing.Point(988, 187);
             this.threadValueLabel.Name = "threadValueLabel";
-            this.threadValueLabel.Size = new System.Drawing.Size(23, 25);
+            this.threadValueLabel.Size = new System.Drawing.Size(18, 20);
             this.threadValueLabel.TabIndex = 12;
             this.threadValueLabel.Text = "1";
             // 
@@ -189,7 +189,7 @@
             this.Controls.Add(this.threadsTrackBar);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
-            this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.pictureBoxProcessed);
             this.Controls.Add(this.libraryPicker);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -201,7 +201,7 @@
             this.Name = "Image_Processor_Form";
             this.Text = "Image Processor";
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProcessed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.threadsTrackBar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -219,7 +219,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox libraryPicker;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBoxProcessed;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TrackBar threadsTrackBar;
