@@ -15,8 +15,8 @@ namespace JA_Pixelizacja_Obrazu
 
     public static class CPPLibrary
     {
-        [DllImport(@"D:\SUT\JA\Projekt SEM5\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingCPP.dll", CallingConvention = CallingConvention.Cdecl)]
-        //public static extern void PixelizeRegion()
+        [DllImport(@"D:\SUT\JA\SEM 5 - Projekt\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingCPP.dll", 
+            CallingConvention = CallingConvention.Cdecl)]
         public static extern void PixelizeImage(
             IntPtr imageData,
             int width,
@@ -26,7 +26,8 @@ namespace JA_Pixelizacja_Obrazu
 
     public static class ASMLibrary
     {
-        [DllImport(@"D:\SUT\JA\Projekt SEM5\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingASM.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport(@"D:\SUT\JA\SEM 5 - Projekt\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingASM.dll", 
+            CallingConvention = CallingConvention.StdCall)]
         public static extern void PixelizeImage(
             IntPtr imageData,
             int width,

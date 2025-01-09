@@ -42,13 +42,6 @@ extern "C"
                         sumR += imageData[index + 2];
                         sumA += imageData[index + 3];
 
-
-                        // TODO: czy mo¿na tak omin¹æ dodatkowe 2 nestowane for loopy?
-                        //imageData[index + 0] += static_cast<unsigned char>(imageData[index + 0] / (pixelSize * pixelSize));
-                        //imageData[index + 1] += static_cast<unsigned char>(imageData[index + 1] / (pixelSize * pixelSize));
-                        //imageData[index + 2] += static_cast<unsigned char>(imageData[index + 2] / (pixelSize * pixelSize));
-                        //imageData[index + 3] += static_cast<unsigned char>(imageData[index + 3] / (pixelSize * pixelSize));
-
                         count++;
                     }
                 }

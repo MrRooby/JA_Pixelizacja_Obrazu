@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace JA_Pixelizacja_Obrazu
 {
@@ -107,8 +108,6 @@ namespace JA_Pixelizacja_Obrazu
             Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize);
             Bitmap croppedImage = CroppedBitmapForProcessing(cropArea);
 
-            //processingLibrary(ConvertImageToPointer(croppedImage), croppedImage.Width, croppedImage.Height, pixelSize);
-
             // Ensure the cropped image is in a compatible pixel format
             using (Bitmap formattedImage = croppedImage.Clone(
                 new Rectangle(0, 0, croppedImage.Width, croppedImage.Height),
@@ -124,7 +123,9 @@ namespace JA_Pixelizacja_Obrazu
 
                 try
                 {
-                    IntPtr imagePtr = bitmapData.Scan0;
+                    IntPtr imagePtr = bitmapData.Scan0;                    
+                    //int stride = bitmapData.Stride;
+                    //MessageBox.Show("Stride: " + stride);
 
                     // Validate pixelSize
                     if (pixelSize <= 0)
@@ -133,8 +134,7 @@ namespace JA_Pixelizacja_Obrazu
                     }
 
                     stopwatch.Start();
-                    // Call the C++ PixelizeImage function
-                    // CPPLibrary.PixelizeImage(imagePtr, formattedImage.Width, formattedImage.Height, pixelSize);
+
                     processingLibrary(imagePtr, formattedImage.Width, formattedImage.Height, pixelSize);
                     stopwatch.Stop();
                     elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
