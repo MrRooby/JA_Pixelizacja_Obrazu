@@ -1,6 +1,6 @@
 ﻿namespace JA_Pixelizacja_Obrazu
 {
-    partial class Image_Processor_Form
+    partial class ImageProcessorForm
     {
         /// <summary>
         /// Required designer variable.
@@ -43,6 +43,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.threadsTrackBar = new System.Windows.Forms.TrackBar();
             this.threadValueLabel = new System.Windows.Forms.Label();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProcessed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.threadsTrackBar)).BeginInit();
@@ -57,7 +58,7 @@
             this.processButton.TabIndex = 0;
             this.processButton.Text = "Process";
             this.processButton.UseVisualStyleBackColor = true;
-            this.processButton.Click += new System.EventHandler(this.processButton_Click);
+            this.processButton.Click += new System.EventHandler(this.Process_ButtonClick);
             // 
             // label1
             // 
@@ -84,7 +85,7 @@
             this.browseFilesButton.TabIndex = 3;
             this.browseFilesButton.Text = "Browse";
             this.browseFilesButton.UseVisualStyleBackColor = true;
-            this.browseFilesButton.Click += new System.EventHandler(this.browseFilesButton_Click);
+            this.browseFilesButton.Click += new System.EventHandler(this.BrowseFiles_ButtonClick);
             // 
             // pixelNumPicker
             // 
@@ -167,7 +168,7 @@
             this.threadsTrackBar.Size = new System.Drawing.Size(628, 56);
             this.threadsTrackBar.TabIndex = 11;
             this.threadsTrackBar.Value = 1;
-            this.threadsTrackBar.Scroll += new System.EventHandler(this.threadsTrackBar_Scroll);
+            this.threadsTrackBar.Scroll += new System.EventHandler(this.Threads_TrackBarScroll);
             // 
             // threadValueLabel
             // 
@@ -179,12 +180,23 @@
             this.threadValueLabel.TabIndex = 12;
             this.threadValueLabel.Text = "1";
             // 
-            // Image_Processor_Form
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(44, 252);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(95, 20);
+            this.checkBox1.TabIndex = 13;
+            this.checkBox1.Text = "checkBox1";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // ImageProcessorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.ClientSize = new System.Drawing.Size(1150, 839);
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.threadValueLabel);
             this.Controls.Add(this.threadsTrackBar);
             this.Controls.Add(this.label5);
@@ -198,7 +210,7 @@
             this.Controls.Add(this.filePathTextBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.processButton);
-            this.Name = "Image_Processor_Form";
+            this.Name = "ImageProcessorForm";
             this.Text = "Image Processor";
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxProcessed)).EndInit();
@@ -224,6 +236,7 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TrackBar threadsTrackBar;
         private System.Windows.Forms.Label threadValueLabel;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 

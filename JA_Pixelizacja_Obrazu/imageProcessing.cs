@@ -11,6 +11,9 @@ using System.Windows.Forms;
 
 namespace JA_Pixelizacja_Obrazu
 {
+    /// <summary>
+    /// Class for processing images
+    /// </summary>
     public class ImageProcessing
     {
         [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
@@ -24,7 +27,12 @@ namespace JA_Pixelizacja_Obrazu
         public static PixelizeLibraryDelegate processingLibrary;
         public long? elapsedMilliseconds = null;
 
-        public void chooseProcessingLibrary(String choice)
+        /// <summary>
+        /// Sets the processing library to be used for pixelizing the image.
+        /// </summary>
+        /// <param name="choice"> ASM or C++  </param>
+        /// 
+        public void ChooseProcessingLibrary(String choice)
         {
             if (choice == "C++")
             {
@@ -36,12 +44,21 @@ namespace JA_Pixelizacja_Obrazu
             }
         }
 
+        /// <summary>
+        /// Loads an image from the specified path for further processing.
+        /// </summary>
+        /// <param name="path"> file location </param>
         public void LoadImage(String path)
         {
             fileInputPath = path;
             imageBitmap = new Bitmap(fileInputPath);
         }
 
+        /// <summary>
+        /// Converts bitmap image to pointer.
+        /// </summary>
+        /// <param name="bitmap"> input image </param>
+        /// <returns> Pointer to an image </returns>
         public IntPtr ConvertImageToPointer(Bitmap bitmap)
         {
             IntPtr imagePtr;
@@ -53,28 +70,77 @@ namespace JA_Pixelizacja_Obrazu
             return imagePtr = imageData.Scan0;
         }
 
-        Rectangle AreaForProcessing(Bitmap originalBitmap, int pixelSize)
+        /// <summary>
+        /// Calculates the greatest common divisor of two numbers.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns> GCD of two numbers </returns>
+        private int GCD(int a, int b)
         {
-            int xOverflow = originalBitmap.Width % pixelSize;
-            int yOverflow = originalBitmap.Height % pixelSize;
-
-            int x = originalBitmap.Width - xOverflow;
-            int y = originalBitmap.Height - yOverflow;
-
-            return new Rectangle(0, 0, x, y);
+            while (b != 0)
+            {
+                int temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
         }
 
+        /// <summary>
+        /// Calculates the least common multiple of two numbers.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns> LCM of two numbers </returns>
+        private int LCM(int a, int b)
+        {
+            return a * b / GCD(a, b);
+        }
+
+        /// <summary>
+        /// Calculates the area for the image so the pixel count
+        /// is divisible by the pixel size and thread count.
+        /// </summary>
+        /// <param name="originalBitmap"> image for which to calculate the area</param>
+        /// <param name="pixelSize"> how many pixel will be averaged</param>
+        /// <param name="threadCount"> count of threads the operation will be performed</param>
+        /// <returns> Rectangle divisible by pixelSize and threadCount</returns>
+        Rectangle AreaForProcessing(Bitmap originalBitmap, int pixelSize, int threadCount)
+        {
+            int width = originalBitmap.Width;
+            int height = originalBitmap.Height;
+
+            int lcm = LCM(pixelSize, threadCount);
+
+            // Calculate the new width and height
+            int newWidth = (width / lcm) * lcm; 
+            int newHeight = (height / lcm) * lcm;
+
+            return new Rectangle(0, 0, newWidth, newHeight);
+        }
+
+        /// <summary>
+        /// Cropps the image according to the specified area.
+        /// </summary>
+        /// <param name="cropArea"> size of the returned image</param>
+        /// <returns> cropped image </returns>
+        /// <exception cref="Exception"> Thrown if <paramref name="cropArea"/> exceeds the current image size</exception>
         private unsafe Bitmap CroppedBitmapForProcessing(Rectangle cropArea)
         {
             // Check if the image is already cropped
             if ((imageBitmap.Width == cropArea.Width) && (imageBitmap.Height == cropArea.Height))
                 return imageBitmap;
-            // Che if the crop area is larger than the image
+
+            // Check if the crop area is larger than the image
             else if ((imageBitmap.Width < cropArea.Width) || (imageBitmap.Height < cropArea.Height))
                 throw new Exception("Crop area is larger than the image");
 
             // Load the origianl image to the memory
-            BitmapData sourceBitmapData = imageBitmap.LockBits(new Rectangle(0, 0, imageBitmap.Width, imageBitmap.Height), ImageLockMode.ReadOnly, imageBitmap.PixelFormat);
+            BitmapData sourceBitmapData = imageBitmap.LockBits(
+                new Rectangle(0, 0, imageBitmap.Width, imageBitmap.Height), 
+                ImageLockMode.ReadOnly, 
+                imageBitmap.PixelFormat);
             int bpp = sourceBitmapData.Stride / sourceBitmapData.Width; // 3 or 4
             var srcPtr = (byte*)sourceBitmapData.Scan0.ToPointer() + cropArea.Y * sourceBitmapData.Stride + cropArea.X * bpp;
             int srcStride = sourceBitmapData.Stride;
@@ -102,10 +168,29 @@ namespace JA_Pixelizacja_Obrazu
             return croppedImage;
         }
 
-        public Bitmap processImage(int pixelSize)
+        /// <summary>
+        /// Processes the image using the specified pixel size and thread count.
+        /// </summary>
+        /// <param name="pixelSize"> size of area to average</param>
+        /// <param name="threadCount"> number of threads operation will be performed on</param>
+        /// <returns> Processed image </returns>
+        /// <exception cref="ArgumentException"> 
+        /// Throw if <paramref name="pixelSize"/> 
+        /// or <paramref name="threadCount"/> 
+        /// is less than 1</exception>
+        public Bitmap ProcessImage(int pixelSize, int threadCount)
         {
             Stopwatch stopwatch = new Stopwatch();
-            Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize);
+
+            int totalPixels = imageBitmap.Width * imageBitmap.Height;
+
+            if( threadCount > ( totalPixels / (pixelSize*pixelSize) ) )
+            {
+                throw new ArgumentException("Image to small for selected threads and pixelization");
+            }
+
+            Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize, threadCount);
+
             Bitmap croppedImage = CroppedBitmapForProcessing(cropArea);
 
             // Ensure the cropped image is in a compatible pixel format
@@ -123,24 +208,33 @@ namespace JA_Pixelizacja_Obrazu
 
                 try
                 {
-                    IntPtr imagePtr = bitmapData.Scan0;                    
-                    //int stride = bitmapData.Stride;
-                    //MessageBox.Show("Stride: " + stride);
+                    IntPtr basePtr = bitmapData.Scan0;
+                    int stride = bitmapData.Stride;
 
-                    // Validate pixelSize
-                    if (pixelSize <= 0)
-                    {
-                        throw new ArgumentException("Pixel size must be a positive integer.");
-                    }
-
+                    int rowsPerThread = formattedImage.Height / threadCount;
+                    List<Task> tasks = new List<Task>();
+                    
                     stopwatch.Start();
 
-                    processingLibrary(imagePtr, formattedImage.Width, formattedImage.Height, pixelSize);
-                    stopwatch.Stop();
-                    elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                    for (int i = 0; i < threadCount; i++)
+                    {
+                        int startY = i * rowsPerThread;
+                        int endY = (i == threadCount - 1) ? formattedImage.Height : (i + 1) * rowsPerThread;
+
+                        tasks.Add(Task.Run(() =>
+                        {
+                            // Process sub-rectangle: (0, startY) to (width, endY)
+                            IntPtr subPtr = basePtr + (startY * stride);
+                            processingLibrary(subPtr, formattedImage.Width, endY - startY, pixelSize);
+                        }));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
                 }
                 finally
                 {
+                    stopwatch.Stop();
+                    elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
                     // Ensure that we unlock the bits even if an exception occurs
                     formattedImage.UnlockBits(bitmapData);
                 }

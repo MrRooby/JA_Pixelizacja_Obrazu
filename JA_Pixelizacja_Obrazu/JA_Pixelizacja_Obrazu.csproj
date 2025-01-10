@@ -70,18 +70,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller.cs" />
-    <Compile Include="Image_Processor_Form.cs">
+    <Compile Include="ImageProcessorForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Image_Processor_Form.Designer.cs">
-      <DependentUpon>Image_Processor_Form.cs</DependentUpon>
+    <Compile Include="ImageProcessorForm.Designer.cs">
+      <DependentUpon>ImageProcessorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageProcessing.cs" />
     <Compile Include="PixelizeLibraryDelegate.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Image_Processor_Form.resx">
-      <DependentUpon>Image_Processor_Form.cs</DependentUpon>
+    <Compile Include="Threads.cs" />
+    <EmbeddedResource Include="ImageProcessorForm.resx">
+      <DependentUpon>ImageProcessorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

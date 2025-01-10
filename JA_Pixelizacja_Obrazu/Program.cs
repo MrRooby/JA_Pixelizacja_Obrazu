@@ -9,7 +9,7 @@ using System.Windows.Forms;
  @Author: Bartosz Faruga
  @Title: Pixelization of an image
 
- @version: 0.4
+ @version: 0.5
  */
 
 
@@ -17,15 +17,12 @@ namespace JA_Pixelizacja_Obrazu
 {
     internal static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Image_Processor_Form());
+            Application.Run(new ImageProcessorForm());
         }
     }
 }
