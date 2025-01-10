@@ -15,12 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="imageProcessor.asm">
+    <MASM Include="ImageProcessingASM.asm">
       <Filter>Source Files</Filter>
     </MASM>
   </ItemGroup>
   <ItemGroup>
-    <None Include="imageProcessor.def">
+    <None Include="ImageProcessingASM.def">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

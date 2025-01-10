@@ -12,6 +12,7 @@ extern "C"
         int pixelSize)            // Size of the pixelization block (e.g., 10 for 10x10)
     {
         if (pixelSize < 1) return; // Invalid pixel size
+        int count = pixelSize * pixelSize; // Number of pixels in the block
 
         // Iterate over the image in blocks of pixelSize x pixelSize
         for (int y = 0; y < height; y += pixelSize)
@@ -20,7 +21,6 @@ extern "C"
             {
                 // Variables to accumulate color components
                 long sumR = 0, sumG = 0, sumB = 0, sumA = 0;
-                int count = 0;
 
                 // Iterate over each pixel within the current block
                 for (int dy = 0; dy < pixelSize; dy++)
@@ -41,12 +41,10 @@ extern "C"
                         sumG += imageData[index + 1];
                         sumR += imageData[index + 2];
                         sumA += imageData[index + 3];
-
-                        count++;
                     }
                 }
 
-                if (count == 0) continue; // Avoid division by zero
+                //if (count == 0) continue; // Avoid division by zero
 
                 // Calculate average color components
                 unsigned char avgB = static_cast<unsigned char>(sumB / count);
