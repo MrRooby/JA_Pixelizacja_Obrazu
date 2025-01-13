@@ -9,7 +9,7 @@ using System.Windows.Forms;
  @Author: Bartosz Faruga
  @Title: Pixelization of an image
 
- @version: 0.6
+ @version: 0.7
  */
 
 

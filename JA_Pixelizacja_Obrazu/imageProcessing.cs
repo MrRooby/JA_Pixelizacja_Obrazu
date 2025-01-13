@@ -6,7 +6,9 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace JA_Pixelizacja_Obrazu
@@ -18,7 +20,7 @@ namespace JA_Pixelizacja_Obrazu
     {
         [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
         private static extern unsafe byte* memcpy(byte* destination, byte* source, int count);
-        
+
         private String fileInputPath;
         private String fileOutputPath;
 
@@ -114,7 +116,7 @@ namespace JA_Pixelizacja_Obrazu
             int lcm = LCM(pixelSize, threadCount);
 
             // Calculate the new width and height
-            int newWidth = (width / lcm) * lcm; 
+            int newWidth = (width / lcm) * lcm;
             int newHeight = (height / lcm) * lcm;
 
             return new Rectangle(0, 0, newWidth, newHeight);
@@ -138,8 +140,8 @@ namespace JA_Pixelizacja_Obrazu
 
             // Load the origianl image to the memory
             BitmapData sourceBitmapData = imageBitmap.LockBits(
-                new Rectangle(0, 0, imageBitmap.Width, imageBitmap.Height), 
-                ImageLockMode.ReadOnly, 
+                new Rectangle(0, 0, imageBitmap.Width, imageBitmap.Height),
+                ImageLockMode.ReadOnly,
                 imageBitmap.PixelFormat);
             int bpp = sourceBitmapData.Stride / sourceBitmapData.Width; // 3 or 4
             var srcPtr = (byte*)sourceBitmapData.Scan0.ToPointer() + cropArea.Y * sourceBitmapData.Stride + cropArea.X * bpp;
@@ -148,8 +150,8 @@ namespace JA_Pixelizacja_Obrazu
             // Create a new bitmap for the cropped image
             Bitmap croppedImage = new Bitmap(cropArea.Width, cropArea.Height, imageBitmap.PixelFormat);
             BitmapData destinationBitmapData = croppedImage.LockBits(
-                new Rectangle(0, 0, croppedImage.Width, croppedImage.Height), 
-                ImageLockMode.WriteOnly, 
+                new Rectangle(0, 0, croppedImage.Width, croppedImage.Height),
+                ImageLockMode.WriteOnly,
                 croppedImage.PixelFormat);
             var dstPtr = (byte*)destinationBitmapData.Scan0.ToPointer();
             int dstStride = destinationBitmapData.Stride;
@@ -182,66 +184,79 @@ namespace JA_Pixelizacja_Obrazu
         {
             Stopwatch stopwatch = new Stopwatch();
 
-            int totalPixels = imageBitmap.Width * imageBitmap.Height;
-
-            if( threadCount > ( totalPixels / (pixelSize*pixelSize) ) )
-            {
-                throw new ArgumentException("Image to small for selected threads and pixelization");
-            }
-
             Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize, threadCount);
 
-            Bitmap croppedImage = CroppedBitmapForProcessing(cropArea);
+            // Create a copy of the loaded image
+            Bitmap bitmap = new Bitmap(CroppedBitmapForProcessing(cropArea));
+            Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
+            BitmapData bmpData = bitmap.LockBits(
+                rect,
+                ImageLockMode.ReadWrite,
+                PixelFormat.Format32bppArgb);
 
-            // Ensure the cropped image is in a compatible pixel format
-            using (Bitmap formattedImage = croppedImage.Clone(
-                new Rectangle(0, 0, croppedImage.Width, croppedImage.Height),
-                PixelFormat.Format32bppArgb))
+            int width = bitmap.Width;
+            int height = bitmap.Height;
+            int stride = bmpData.Stride;
+
+            // Calculate the number of bytes required and copy pixel data
+            int bytes = Math.Abs(stride) * height;
+            // Allocate arrays for the image data
+            byte[] data = new byte[bytes];
+            Marshal.Copy(bmpData.Scan0, data, 0, bytes);
+
+            Thread[] threads = new Thread[threadCount];
+
+            int numOfBlocks = height / pixelSize;
+            int rowPerThread = numOfBlocks / threadCount;
+
+            stopwatch.Start();
+
+            int currentRow = 0;
+
+            for (int t = 0; t < threadCount; t++)
             {
-                // Lock the bitmap's bits for read/write access
-                Rectangle rect = new Rectangle(0, 0, formattedImage.Width, formattedImage.Height);
-                BitmapData bitmapData = formattedImage.LockBits(
-                    rect,
-                    ImageLockMode.ReadWrite,
-                    formattedImage.PixelFormat
-                );
+                int startRow = currentRow;
 
-                try
+                int endRow = (t == threadCount - 1) ? height : (startRow + rowPerThread);
+                currentRow = endRow;
+
+                threads[t] = new Thread(() =>
                 {
-                    IntPtr basePtr = bitmapData.Scan0;
-                    int stride = bitmapData.Stride;
+                    int heightForThread = endRow - startRow;
 
-                    int rowsPerThread = formattedImage.Height / threadCount;
-                    List<Task> tasks = new List<Task>();
-                    
-                    stopwatch.Start();
+                    // Overlap for neighboring rows
+                    int localStart = Math.Max(0, startRow - 1);
+                    int localEnd = Math.Min(height, endRow + 1);
+                    int localHeight = localEnd - localStart;
 
-                    for (int i = 0; i < threadCount; i++)
-                    {
-                        int startY = i * rowsPerThread;
-                        int endY = (i == threadCount - 1) ? formattedImage.Height : (i + 1) * rowsPerThread;
+                    byte[] image = new byte[localHeight * stride];
+                    Buffer.BlockCopy(data, localStart * stride, image, 0, localHeight * stride);
 
-                        tasks.Add(Task.Run(() =>
-                        {
-                            // Process sub-rectangle: (0, startY) to (width, endY)
-                            IntPtr subPtr = basePtr + (startY * stride);
-                            processingLibrary(subPtr, formattedImage.Width, endY - startY, pixelSize);
-                        }));
-                    }
+                    processingLibrary(image, width, localHeight, pixelSize);
 
-                    Task.WaitAll(tasks.ToArray());
-                }
-                finally
-                {
-                    stopwatch.Stop();
-                    elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
-                    // Ensure that we unlock the bits even if an exception occurs
-                    formattedImage.UnlockBits(bitmapData);
-                }
+                    int outCopyOffset = (startRow - localStart) * stride;
+                    int outCopySize = heightForThread * stride;
 
-                // Optionally, you can clone the formattedImage to return a new Bitmap
-                return (Bitmap)formattedImage.Clone();
+                    // Copy processed data from local output buffer back to main data array
+                    Buffer.BlockCopy(image, outCopyOffset, data, startRow * stride, outCopySize);
+
+                });
+                // Start the thread
+                threads[t].Start();
             }
+
+            foreach (Thread thread in threads)
+            {
+                thread.Join();
+            }
+
+            stopwatch.Stop();
+            elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+
+            Marshal.Copy(data, 0, bmpData.Scan0, bytes);
+            bitmap.UnlockBits(bmpData);
+
+            return bitmap;
         }
     }
 }

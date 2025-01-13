@@ -16,7 +16,7 @@ namespace JA_Pixelizacja_Obrazu
     /// <param name="height"></param>
     /// <param name="pixelSize"></param>
     public delegate void PixelizeLibraryDelegate(
-            IntPtr imageData,         // Pointer to the image pixel data
+            byte[] imageData,         // Pointer to the image pixel data
             int width,                // Width of the image in pixels
             int height,               // Height of the image in pixels
             int pixelSize);           // Size of the pixelization block (e.g., 10 for 10x10)
@@ -29,7 +29,7 @@ namespace JA_Pixelizacja_Obrazu
         [DllImport(@"D:\SUT\JA\SEM 5 - Projekt\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingCPP.dll", 
             CallingConvention = CallingConvention.Cdecl)]
         public static extern void PixelizeImage(
-            IntPtr imageData,
+            byte[] imageData,
             int width,
             int height,
             int pixelSize);
@@ -43,7 +43,7 @@ namespace JA_Pixelizacja_Obrazu
         [DllImport(@"D:\SUT\JA\SEM 5 - Projekt\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingASM.dll", 
             CallingConvention = CallingConvention.StdCall)]
         public static extern void PixelizeImage(
-            IntPtr imageData,
+            byte[] imageData,
             int width,
             int height,
             int pixelSize);
