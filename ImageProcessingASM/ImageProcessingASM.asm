@@ -44,6 +44,10 @@ PixelizeImage PROC
     mov ebp, r9d
     imul rbp, rbp
 
+    vmovd xmm4, ebp     ; Move 32-bit count value to xmm4
+    pshufd xmm4, xmm4, 0
+    cvtdq2ps xmm4, xmm4
+
 OuterLoopY: ; Loop iterates over rows (y) adding pixelSize every iteration of the image until height is reached
     ; Compare current y with height (r8d)
     cmp r14d, r8d       ; y >= height?
@@ -100,7 +104,6 @@ BlockLoopX:
     shl rbx, 2           ; multiply by 4 (shift left by 2)
 
     ; 9) Read two pixels from the image data and unpack them to 16-bit values   
-    ;!!!!!!!!!!!!!!!!!! error with the following line, when crashes always when trying to read 8th byte !!!!!!!!!!!!!!!!!
     movdqu xmm0, [rcx + rbx]        ; BRGA; 
     vpmovzxbd ymm0, xmm0            ; Unpack 8-bit to 16-bit, ymm2 = [B0 G0 R0 A0 | B1 G1 R1 A1]
     vpaddd ymm1, ymm1, ymm0         ; Accumulate 16-bit values, ymm1 += ymm2
@@ -115,68 +118,19 @@ EndBlockX:
     jmp BlockLoopY
 
 EndBlockY:
-    ; Calculate the average of the 2 pixels in the block
-    vmovdqa ymm4, ymm1            ; Copy ymm1 to ymm4
+    ; Calculate the average RGBA value for the block
+    vmovdqa ymm5, ymm1            ; Copy ymm1 to ymm4 for adding up two pixels from accumulator
     vextracti128 xmm1, ymm1, 1    ; Extract the upper 128 bits of ymm1 into xmm1 | First pixel
-    vextracti128 xmm4, ymm4, 0    ; Extract the lower 128 bits of ymm3 into xmm4 | Second pixel
+    vextracti128 xmm5, ymm5, 0    ; Extract the lower 128 bits of ymm3 into xmm4 | Second pixel
 
-    ; First pixel
-    pextrd r12d, xmm4, 0         ; B
-    pextrd r15d, xmm4, 1         ; G
-    pextrd esi, xmm4, 2          ; R
-    pextrd edi, xmm4, 3          ; A
+    paddd xmm1, xmm5              ; Add both accumulator values
+    cvtdq2ps xmm1, xmm1           ; Change values from int to float for division
+    divps xmm1, xmm4              ; Divide accumulated data by pixel count of the block
+    cvttps2dq xmm1, xmm1          ; Change values back to int
 
-    ; Second pixel + First pixel
-    pextrd eax, xmm1, 0         ; B
-    add r12d, eax
-    pextrd eax, xmm1, 1         ; G
-    add r15d, eax
-    pextrd eax, xmm1, 2         ; R
-    add esi, eax
-    pextrd eax, xmm1, 3         ; A
-    add edi, eax
-
-    push rdx            ; Save rdx register because cdq will overwrite it
-
-    ; Calculate the average value of RGBA in the block
-    xor rax, rax        ; Clear rax
-    mov eax, r12d       ; sumB
-    cdq                 ; sign extend
-    idiv rbp            ; divide by count
-    movzx r12d, al      ; r12d = avgB
-
-    xor rax, rax        ; Clear rax
-    mov eax, r15d       ; sumG
-    cdq
-    idiv rbp
-    movzx r15d, al      ; r15d = avgG
-
-    xor rax, rax        ; Clear rax
-    mov eax, esi        ; sumR
-    cdq
-    idiv rbp
-    movzx rsi, al       ; rsi = avgR
-
-    xor rax, rax        ; Clear rax
-    mov eax, edi        ; sumA
-    cdq
-    idiv rbp
-    movzx rdi, al       ; rdi = avgA
-
-    pop rdx             ; Restore rdx register 
-
-    ;Clear xmm1 register to insert the average value
-    vpxor xmm1, xmm1, xmm1
-
-    ; Insert four registers to xmm1
-    pinsrb xmm1, r12d, 0         ; Insert avgB into xmm1[0]
-    pinsrb xmm1, r15d, 1         ; Insert avgG into xmm1[1]
-    pinsrb xmm1, esi, 2          ; Insert avgR into xmm1[2]
-    pinsrb xmm1, edi, 3          ; Insert avgA into xmm1[3]
-    
-    ; Broadcast the average value to all 16-bit values in ymm1
-    ; So that we can insert the average value 4 pixels at a time
-    pshufd xmm1, xmm1, 0
+    ; Pack the 32-bit values in xmm1 to 8-bit values for insertion
+    packusdw xmm1, xmm1           ; Pack the 32-bit values in xmm1 to 16-bit values
+    packuswb xmm1, xmm1           ; Pack the 16-bit values in xmm1 to 8-bit values
 
     ; Write the average to all pixels in the block
     mov r10d, 0         ; dy = 0

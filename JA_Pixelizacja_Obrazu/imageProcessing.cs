@@ -209,8 +209,8 @@ namespace JA_Pixelizacja_Obrazu
             int numOfBlocks = height / pixelSize;
             int rowPerThread = numOfBlocks / threadCount;
 
-            stopwatch.Start();
-
+            //stopwatch.Start();
+            elapsedMilliseconds = 0;
             int currentRow = 0;
 
             for (int t = 0; t < threadCount; t++)
@@ -232,7 +232,12 @@ namespace JA_Pixelizacja_Obrazu
                     byte[] image = new byte[localHeight * stride];
                     Buffer.BlockCopy(data, localStart * stride, image, 0, localHeight * stride);
 
+                    stopwatch.Start();
+
                     processingLibrary(image, width, localHeight, pixelSize);
+
+                    stopwatch.Stop();
+                    elapsedMilliseconds += stopwatch.ElapsedMilliseconds;
 
                     int outCopyOffset = (startRow - localStart) * stride;
                     int outCopySize = heightForThread * stride;
@@ -250,7 +255,7 @@ namespace JA_Pixelizacja_Obrazu
                 thread.Join();
             }
 
-            stopwatch.Stop();
+            //stopwatch.Stop();
             elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
             Marshal.Copy(data, 0, bmpData.Scan0, bytes);
