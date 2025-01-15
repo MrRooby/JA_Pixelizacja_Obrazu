@@ -39,9 +39,13 @@ namespace JA_Pixelizacja_Obrazu
             {
                 processingLibrary = CPPLibrary.PixelizeImage;
             }
-            else if (choice == "ASM")
+            else if (choice == "ASM SIMD")
             {
                 processingLibrary = ASMLibrary.PixelizeImage;
+            }
+            else if (choice == "ASM")
+            {
+                processingLibrary = ASM_NonVectorLibrary.PixelizeImage;
             }
         }
 
@@ -116,7 +120,7 @@ namespace JA_Pixelizacja_Obrazu
             int newHeight;
 
             // Calculate the new width and height
-            if(squarePixels)
+            if (squarePixels)
             {
                 newWidth = width - (width % pixelSize);
                 newHeight = height - (height % pixelSize);

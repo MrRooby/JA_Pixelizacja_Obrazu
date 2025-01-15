@@ -26,7 +26,7 @@ namespace JA_Pixelizacja_Obrazu
     /// </summary>
     public static class CPPLibrary
     {
-        [DllImport(@"D:\SUT\JA\SEM 5 - Projekt\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingCPP.dll", 
+        [DllImport("ImageProcessingCPP.dll",
             CallingConvention = CallingConvention.Cdecl)]
         public static extern void PixelizeImage(
             byte[] imageData,
@@ -34,13 +34,24 @@ namespace JA_Pixelizacja_Obrazu
             int height,
             int pixelSize);
     }
-    
+
     /// <summary>
     /// Class containing the ASM library functions for pixelization.
     /// </summary>
     public static class ASMLibrary
     {
-        [DllImport(@"D:\SUT\JA\SEM 5 - Projekt\JA_Pixelizacja_Obrazu\x64\Debug\ImageProcessingASM.dll", 
+        [DllImport("ImageProcessingASM.dll",
+            CallingConvention = CallingConvention.StdCall)]
+        public static extern void PixelizeImage(
+            byte[] imageData,
+            int width,
+            int height,
+            int pixelSize);
+    }
+
+    public static class ASM_NonVectorLibrary
+    {
+        [DllImport("ImageProcessingASM_NonVector.dll",
             CallingConvention = CallingConvention.StdCall)]
         public static extern void PixelizeImage(
             byte[] imageData,

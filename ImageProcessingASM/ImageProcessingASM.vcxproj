@@ -18,10 +18,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="ImageProcessingASM.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ImageProcessingASM.def" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{19a60a12-7305-407c-ab06-ae68b9c8fbeb}</ProjectGuid>
+    <ProjectGuid>{d0a63370-e089-47fe-8e0c-2f373c687110}</ProjectGuid>
     <RootNamespace>ImageProcessingASM</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -143,12 +149,6 @@
       <NoEntryPoint>true</NoEntryPoint>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <MASM Include="ImageProcessingASM.asm" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ImageProcessingASM.def" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />

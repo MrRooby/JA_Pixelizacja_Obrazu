@@ -46,7 +46,7 @@ namespace JA_Pixelizacja_Obrazu
 
                 Histogram histogram = new Histogram();
                 histogram.GetHistogram(LoadingLabelOriginal, Image.FromFile(openFileDialog.FileName), this, PictureBoxHistogramOriginal);
-            
+
                 // Clear previous processed image
                 PictureBoxProcessed.Image = null;
                 PictureBoxHistogramProcessed.Image = null;

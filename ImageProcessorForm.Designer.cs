@@ -60,9 +60,10 @@
             // processButton
             // 
             this.processButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F);
-            this.processButton.Location = new System.Drawing.Point(533, 392);
+            this.processButton.Location = new System.Drawing.Point(400, 318);
+            this.processButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.processButton.Name = "processButton";
-            this.processButton.Size = new System.Drawing.Size(127, 53);
+            this.processButton.Size = new System.Drawing.Size(95, 43);
             this.processButton.TabIndex = 0;
             this.processButton.Text = "Process";
             this.processButton.UseVisualStyleBackColor = true;
@@ -72,7 +73,8 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label1.Location = new System.Drawing.Point(19, 26);
+            this.label1.Location = new System.Drawing.Point(14, 21);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(276, 20);
             this.label1.TabIndex = 1;
@@ -80,16 +82,18 @@
             // 
             // filePathTextBox
             // 
-            this.filePathTextBox.Location = new System.Drawing.Point(344, 26);
+            this.filePathTextBox.Location = new System.Drawing.Point(258, 21);
+            this.filePathTextBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.filePathTextBox.Name = "filePathTextBox";
-            this.filePathTextBox.Size = new System.Drawing.Size(673, 22);
+            this.filePathTextBox.Size = new System.Drawing.Size(506, 20);
             this.filePathTextBox.TabIndex = 2;
             // 
             // browseFilesButton
             // 
-            this.browseFilesButton.Location = new System.Drawing.Point(1041, 19);
+            this.browseFilesButton.Location = new System.Drawing.Point(781, 15);
+            this.browseFilesButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.browseFilesButton.Name = "browseFilesButton";
-            this.browseFilesButton.Size = new System.Drawing.Size(115, 37);
+            this.browseFilesButton.Size = new System.Drawing.Size(86, 30);
             this.browseFilesButton.TabIndex = 3;
             this.browseFilesButton.Text = "Browse";
             this.browseFilesButton.UseVisualStyleBackColor = true;
@@ -108,16 +112,18 @@
             "256",
             "512",
             "1024"});
-            this.pixelNumPicker.Location = new System.Drawing.Point(344, 91);
+            this.pixelNumPicker.Location = new System.Drawing.Point(258, 74);
+            this.pixelNumPicker.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pixelNumPicker.Name = "pixelNumPicker";
-            this.pixelNumPicker.Size = new System.Drawing.Size(68, 24);
+            this.pixelNumPicker.Size = new System.Drawing.Size(52, 21);
             this.pixelNumPicker.TabIndex = 4;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label2.Location = new System.Drawing.Point(19, 79);
+            this.label2.Location = new System.Drawing.Point(14, 64);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(280, 40);
             this.label2.TabIndex = 5;
@@ -127,7 +133,8 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label3.Location = new System.Drawing.Point(495, 91);
+            this.label3.Location = new System.Drawing.Point(371, 74);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(61, 20);
             this.label3.TabIndex = 6;
@@ -138,17 +145,20 @@
             this.libraryPicker.FormattingEnabled = true;
             this.libraryPicker.Items.AddRange(new object[] {
             "ASM",
+            "ASM SIMD",
             "C++"});
-            this.libraryPicker.Location = new System.Drawing.Point(574, 91);
+            this.libraryPicker.Location = new System.Drawing.Point(430, 74);
+            this.libraryPicker.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.libraryPicker.Name = "libraryPicker";
-            this.libraryPicker.Size = new System.Drawing.Size(68, 24);
+            this.libraryPicker.Size = new System.Drawing.Size(94, 21);
             this.libraryPicker.TabIndex = 7;
             // 
             // PictureBoxProcessed
             // 
-            this.PictureBoxProcessed.Location = new System.Drawing.Point(693, 197);
+            this.PictureBoxProcessed.Location = new System.Drawing.Point(520, 160);
+            this.PictureBoxProcessed.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.PictureBoxProcessed.Name = "PictureBoxProcessed";
-            this.PictureBoxProcessed.Size = new System.Drawing.Size(463, 431);
+            this.PictureBoxProcessed.Size = new System.Drawing.Size(347, 350);
             this.PictureBoxProcessed.TabIndex = 8;
             this.PictureBoxProcessed.TabStop = false;
             // 
@@ -156,7 +166,8 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.label4.Location = new System.Drawing.Point(19, 144);
+            this.label4.Location = new System.Drawing.Point(14, 117);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(70, 20);
             this.label4.TabIndex = 10;
@@ -165,18 +176,20 @@
             // label5
             // 
             this.label5.Location = new System.Drawing.Point(0, 0);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(100, 23);
+            this.label5.Size = new System.Drawing.Size(75, 19);
             this.label5.TabIndex = 0;
             // 
             // threadsTrackBar
             // 
             this.threadsTrackBar.LargeChange = 8;
-            this.threadsTrackBar.Location = new System.Drawing.Point(344, 135);
+            this.threadsTrackBar.Location = new System.Drawing.Point(258, 110);
+            this.threadsTrackBar.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.threadsTrackBar.Maximum = 64;
             this.threadsTrackBar.Minimum = 1;
             this.threadsTrackBar.Name = "threadsTrackBar";
-            this.threadsTrackBar.Size = new System.Drawing.Size(628, 56);
+            this.threadsTrackBar.Size = new System.Drawing.Size(471, 56);
             this.threadsTrackBar.TabIndex = 11;
             this.threadsTrackBar.Value = 1;
             this.threadsTrackBar.Scroll += new System.EventHandler(this.Threads_TrackBarScroll);
@@ -185,7 +198,8 @@
             // 
             this.threadValueLabel.AutoSize = true;
             this.threadValueLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.threadValueLabel.Location = new System.Drawing.Point(988, 135);
+            this.threadValueLabel.Location = new System.Drawing.Point(741, 110);
+            this.threadValueLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.threadValueLabel.Name = "threadValueLabel";
             this.threadValueLabel.Size = new System.Drawing.Size(18, 20);
             this.threadValueLabel.TabIndex = 12;
@@ -197,7 +211,8 @@
             this.CropImageCheckbox.Checked = true;
             this.CropImageCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.CropImageCheckbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 13F);
-            this.CropImageCheckbox.Location = new System.Drawing.Point(793, 85);
+            this.CropImageCheckbox.Location = new System.Drawing.Point(595, 69);
+            this.CropImageCheckbox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.CropImageCheckbox.Name = "CropImageCheckbox";
             this.CropImageCheckbox.Size = new System.Drawing.Size(334, 30);
             this.CropImageCheckbox.TabIndex = 14;
@@ -206,25 +221,28 @@
             // 
             // PictureBoxOriginal
             // 
-            this.PictureBoxOriginal.Location = new System.Drawing.Point(40, 197);
+            this.PictureBoxOriginal.Location = new System.Drawing.Point(30, 160);
+            this.PictureBoxOriginal.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.PictureBoxOriginal.Name = "PictureBoxOriginal";
-            this.PictureBoxOriginal.Size = new System.Drawing.Size(463, 431);
+            this.PictureBoxOriginal.Size = new System.Drawing.Size(347, 350);
             this.PictureBoxOriginal.TabIndex = 15;
             this.PictureBoxOriginal.TabStop = false;
             // 
             // PictureBoxHistogramOriginal
             // 
-            this.PictureBoxHistogramOriginal.Location = new System.Drawing.Point(40, 675);
+            this.PictureBoxHistogramOriginal.Location = new System.Drawing.Point(30, 548);
+            this.PictureBoxHistogramOriginal.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.PictureBoxHistogramOriginal.Name = "PictureBoxHistogramOriginal";
-            this.PictureBoxHistogramOriginal.Size = new System.Drawing.Size(463, 186);
+            this.PictureBoxHistogramOriginal.Size = new System.Drawing.Size(347, 151);
             this.PictureBoxHistogramOriginal.TabIndex = 16;
             this.PictureBoxHistogramOriginal.TabStop = false;
             // 
             // PictureBoxHistogramProcessed
             // 
-            this.PictureBoxHistogramProcessed.Location = new System.Drawing.Point(693, 675);
+            this.PictureBoxHistogramProcessed.Location = new System.Drawing.Point(520, 548);
+            this.PictureBoxHistogramProcessed.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.PictureBoxHistogramProcessed.Name = "PictureBoxHistogramProcessed";
-            this.PictureBoxHistogramProcessed.Size = new System.Drawing.Size(463, 186);
+            this.PictureBoxHistogramProcessed.Size = new System.Drawing.Size(347, 151);
             this.PictureBoxHistogramProcessed.TabIndex = 17;
             this.PictureBoxHistogramProcessed.TabStop = false;
             // 
@@ -232,26 +250,28 @@
             // 
             this.LoadingLabelOriginal.AutoSize = true;
             this.LoadingLabelOriginal.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
-            this.LoadingLabelOriginal.Location = new System.Drawing.Point(143, 756);
+            this.LoadingLabelOriginal.Location = new System.Drawing.Point(107, 614);
+            this.LoadingLabelOriginal.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LoadingLabelOriginal.Name = "LoadingLabelOriginal";
-            this.LoadingLabelOriginal.Size = new System.Drawing.Size(0, 36);
+            this.LoadingLabelOriginal.Size = new System.Drawing.Size(0, 29);
             this.LoadingLabelOriginal.TabIndex = 18;
             // 
             // LoadingLabelProcessed
             // 
             this.LoadingLabelProcessed.AutoSize = true;
             this.LoadingLabelProcessed.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F);
-            this.LoadingLabelProcessed.Location = new System.Drawing.Point(811, 756);
+            this.LoadingLabelProcessed.Location = new System.Drawing.Point(608, 614);
+            this.LoadingLabelProcessed.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LoadingLabelProcessed.Name = "LoadingLabelProcessed";
             this.LoadingLabelProcessed.Size = new System.Drawing.Size(0, 29);
             this.LoadingLabelProcessed.TabIndex = 19;
             // 
             // ImageProcessorForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
-            this.ClientSize = new System.Drawing.Size(1206, 906);
+            this.ClientSize = new System.Drawing.Size(904, 736);
             this.Controls.Add(this.LoadingLabelProcessed);
             this.Controls.Add(this.LoadingLabelOriginal);
             this.Controls.Add(this.PictureBoxOriginal);
@@ -271,6 +291,7 @@
             this.Controls.Add(this.filePathTextBox);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.processButton);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "ImageProcessorForm";
             this.Text = "Image Processor";
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource1)).EndInit();
