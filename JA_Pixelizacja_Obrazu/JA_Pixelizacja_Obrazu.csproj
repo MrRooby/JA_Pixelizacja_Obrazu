@@ -71,6 +71,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller.cs" />
+    <Compile Include="Histogram.cs" />
     <Compile Include="ImageProcessorForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -22,7 +22,6 @@ namespace JA_Pixelizacja_Obrazu
         private static extern unsafe byte* memcpy(byte* destination, byte* source, int count);
 
         private String fileInputPath;
-        private String fileOutputPath;
 
         public Bitmap imageBitmap;
 
@@ -108,16 +107,25 @@ namespace JA_Pixelizacja_Obrazu
         /// <param name="pixelSize"> how many pixel will be averaged</param>
         /// <param name="threadCount"> count of threads the operation will be performed</param>
         /// <returns> Rectangle divisible by pixelSize and threadCount</returns>
-        Rectangle AreaForProcessing(Bitmap originalBitmap, int pixelSize, int threadCount)
+        Rectangle AreaForProcessing(Bitmap originalBitmap, int pixelSize, bool squarePixels)
         {
             int width = originalBitmap.Width;
             int height = originalBitmap.Height;
 
-            int lcm = LCM(pixelSize, threadCount);
+            int newWidth;
+            int newHeight;
 
             // Calculate the new width and height
-            int newWidth = (width / lcm) * lcm;
-            int newHeight = (height / lcm) * lcm;
+            if(squarePixels)
+            {
+                newWidth = width - (width % pixelSize);
+                newHeight = height - (height % pixelSize);
+            }
+            else
+            {
+                newWidth = width - (width % 4);
+                newHeight = height - (height % 4);
+            }
 
             return new Rectangle(0, 0, newWidth, newHeight);
         }
@@ -175,16 +183,18 @@ namespace JA_Pixelizacja_Obrazu
         /// </summary>
         /// <param name="pixelSize"> size of area to average</param>
         /// <param name="threadCount"> number of threads operation will be performed on</param>
+        /// <param name="squarePixels"> if true, the image will be cropped to consist of only square pixels</param> -->-->
         /// <returns> Processed image </returns>
         /// <exception cref="ArgumentException"> 
         /// Throw if <paramref name="pixelSize"/> 
         /// or <paramref name="threadCount"/> 
         /// is less than 1</exception>
-        public Bitmap ProcessImage(int pixelSize, int threadCount)
+        public Bitmap ProcessImage(int pixelSize, int threadCount, bool squarePixels)
         {
             Stopwatch stopwatch = new Stopwatch();
 
-            Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize, threadCount);
+            // Transform image size for processing (must be divisible by 4 because asm library takes in 4 pixels at a time)
+            Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize, squarePixels);
 
             // Create a copy of the loaded image
             Bitmap bitmap = new Bitmap(CroppedBitmapForProcessing(cropArea));
@@ -204,48 +214,42 @@ namespace JA_Pixelizacja_Obrazu
             byte[] data = new byte[bytes];
             Marshal.Copy(bmpData.Scan0, data, 0, bytes);
 
+
+            // Create threads for processing
             Thread[] threads = new Thread[threadCount];
 
             int numOfBlocks = height / pixelSize;
-            int rowPerThread = numOfBlocks / threadCount;
+            float leftOver = height % pixelSize;
 
-            //stopwatch.Start();
-            elapsedMilliseconds = 0;
-            int currentRow = 0;
+            int rowsPerThread = (height / threadCount / pixelSize) * pixelSize;
+            if (rowsPerThread <= 0)
+                throw new ArgumentException("Number of threads is too high for the image size");
+            int remainingRows = height - (rowsPerThread * (threadCount - 1));
+
+            stopwatch.Start();
 
             for (int t = 0; t < threadCount; t++)
             {
-                int startRow = currentRow;
-
-                int endRow = (t == threadCount - 1) ? height : (startRow + rowPerThread);
-                currentRow = endRow;
+                int startRow = t * rowsPerThread;
+                int endRow = (t == threadCount - 1) ? height : startRow + rowsPerThread;
 
                 threads[t] = new Thread(() =>
                 {
                     int heightForThread = endRow - startRow;
 
                     // Overlap for neighboring rows
-                    int localStart = Math.Max(0, startRow - 1);
-                    int localEnd = Math.Min(height, endRow + 1);
+                    int localStart = startRow;
+                    int localEnd = endRow;
                     int localHeight = localEnd - localStart;
 
                     byte[] image = new byte[localHeight * stride];
                     Buffer.BlockCopy(data, localStart * stride, image, 0, localHeight * stride);
 
-                    stopwatch.Start();
-
                     processingLibrary(image, width, localHeight, pixelSize);
 
-                    stopwatch.Stop();
-                    elapsedMilliseconds += stopwatch.ElapsedMilliseconds;
-
-                    int outCopyOffset = (startRow - localStart) * stride;
-                    int outCopySize = heightForThread * stride;
-
-                    // Copy processed data from local output buffer back to main data array
-                    Buffer.BlockCopy(image, outCopyOffset, data, startRow * stride, outCopySize);
-
+                    Buffer.BlockCopy(image, 0, data, localStart * stride, localHeight * stride);
                 });
+
                 // Start the thread
                 threads[t].Start();
             }
@@ -255,7 +259,7 @@ namespace JA_Pixelizacja_Obrazu
                 thread.Join();
             }
 
-            //stopwatch.Stop();
+            stopwatch.Stop();
             elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
             Marshal.Copy(data, 0, bmpData.Scan0, bytes);

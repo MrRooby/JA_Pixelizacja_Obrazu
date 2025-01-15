@@ -21,6 +21,9 @@ namespace JA_Pixelizacja_Obrazu
         public ImageProcessorForm()
         {
             InitializeComponent();
+            // Disable the maximize button and disable resizing
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
         }
 
         /// <summary>
@@ -28,7 +31,7 @@ namespace JA_Pixelizacja_Obrazu
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BrowseFiles_ButtonClick(object sender, EventArgs e)
+        async private void BrowseFiles_ButtonClick(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Select an image";
@@ -38,6 +41,15 @@ namespace JA_Pixelizacja_Obrazu
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 filePathTextBox.Text = openFileDialog.FileName;
+                PictureBoxOriginal.SizeMode = PictureBoxSizeMode.Zoom;
+                PictureBoxOriginal.Image = Image.FromFile(openFileDialog.FileName);
+
+                Histogram histogram = new Histogram();
+                histogram.GetHistogram(LoadingLabelOriginal, Image.FromFile(openFileDialog.FileName), this, PictureBoxHistogramOriginal);
+            
+                // Clear previous processed image
+                PictureBoxProcessed.Image = null;
+                PictureBoxHistogramProcessed.Image = null;
             }
         }
 
@@ -61,6 +73,7 @@ namespace JA_Pixelizacja_Obrazu
         {
             // Load the image
             ImageProcessing imageProcessing = new ImageProcessing();
+            Bitmap processedImage = null;
 
             //Check if a file path is provided
             if (string.IsNullOrEmpty(filePathTextBox.Text))
@@ -76,41 +89,42 @@ namespace JA_Pixelizacja_Obrazu
                 // Choose the processing library
                 imageProcessing.ChooseProcessingLibrary(libraryPicker.Text.ToString());
 
-                Bitmap processedImage = imageProcessing.ProcessImage(Int32.Parse(pixelNumPicker.Text), threadsTrackBar.Value);
+                processedImage = imageProcessing.ProcessImage(Int32.Parse(pixelNumPicker.Text), threadsTrackBar.Value, CropImageCheckbox.Checked);
 
                 // Display the processed image
-                pictureBoxProcessed.SizeMode = PictureBoxSizeMode.Zoom;
-                pictureBoxProcessed.Image = processedImage;
-
-                // Save the processed image to a file
-                string saveFilePath = "C:/Users/barte/OneDrive/Pulpit/processed/processed_image.jpg";
-                DialogResult result = MessageBox.Show("Do you want to save the processed image?", "Save Image", MessageBoxButtons.YesNo);
-                if (result == DialogResult.Yes)
-                {
-                    processedImage.Save(saveFilePath, ImageFormat.Jpeg);
-                    MessageBox.Show($"Image saved to {saveFilePath}");
-                }
-                else
-                {
-                    MessageBox.Show("Image not saved");
-                }
-                pictureBoxProcessed.Image = processedImage;
+                PictureBoxProcessed.SizeMode = PictureBoxSizeMode.Zoom;
+                PictureBoxProcessed.Image = processedImage;
             }
             catch (Exception ex)
             {
-                if(checkBox1.Checked)
-                {
-                    MessageBox.Show($"Error: {ex.ToString()}");
-                }
-                else
-                {
-                    MessageBox.Show($"Error: {ex.Message}");
-                }
+                MessageBox.Show($"Error: {ex.Message}");
             }
             finally
             {
-                // Display the elapsed time
-                MessageBox.Show($"Processing time: {imageProcessing.elapsedMilliseconds} ms");
+                if (processedImage != null)
+                {
+                    // Display the histogram
+                    Histogram histogram = new Histogram();
+                    histogram.GetHistogram(LoadingLabelProcessed, processedImage, this, PictureBoxHistogramProcessed);
+
+                    // Display the elapsed time
+                    MessageBox.Show($"Processing time: {imageProcessing.elapsedMilliseconds} ms");
+
+                    // Save window
+                    DialogResult result = MessageBox.Show("Do you want to save the processed image?", "Save Image", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        SaveFileDialog saveFileDialog = new SaveFileDialog();
+                        saveFileDialog.Title = "Save processed image";
+                        saveFileDialog.Filter = "JPEG Image|*.jpg";
+                        saveFileDialog.FileName = "processed.jpg";
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            processedImage.Save(saveFileDialog.FileName, ImageFormat.Jpeg);
+                            MessageBox.Show("Image saved successfully");
+                        }
+                    }
+                }
             }
         }
     }

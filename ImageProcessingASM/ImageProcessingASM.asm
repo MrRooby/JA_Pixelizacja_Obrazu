@@ -3,10 +3,6 @@
 ; Variables:
     ; r14 - y - outer loop variable
     ; r13 - x - inner loop variable
-    ; r12 - sumB - accumulator for blue channel
-    ; r15 - sumG - accumulator for green channel
-    ; rsi - sumR - accumulator for red channel
-    ; rdi - sumA - accumulator for alpha channel
     ; r10 - dy - block row iteration variable
     ; r11 - dx - block column iteration variable
     ; rbp - count - number of pixels in the block
@@ -29,24 +25,22 @@ PixelizeImage PROC
 
     ; Save registers we will use
     push rbx
-    push rsi
-    push rdi
-    push r12
     push r13
-    push r14
-    push r15
+    push r14    
     push rbp
 
     ; Initialize outer loop variable y -> r14d = 0
     xor r14d, r14d      ; r14d holds y, set to 0
 
     ; Set count value to pixelSize^2 for calculating average pixel value
-    mov ebp, r9d
-    imul rbp, rbp
+    ; mov ebp, r9d
+    ; imul rbp, rbp
 
-    vmovd xmm4, ebp     ; Move 32-bit count value to xmm4
-    pshufd xmm4, xmm4, 0
-    cvtdq2ps xmm4, xmm4
+    ; We will be dividing accumulator which will contain RGBA values
+    ; so we move the count value to xmm4 for division
+    vmovd xmm4, ebp             ; Move 32-bit count value to xmm4
+    pshufd xmm4, xmm4, 0        ; Broadcast the 32-bit value to all 4 bytes
+    cvtdq2ps xmm4, xmm4         ; Convert 32-bit int to float for division
 
 OuterLoopY: ; Loop iterates over rows (y) adding pixelSize every iteration of the image until height is reached
     ; Compare current y with height (r8d)
@@ -62,13 +56,10 @@ OuterLoopX: ; Loop iterates over columns (x) adding pixelSize every iteration of
     jge EndLoopX        ; if so, exit inner loop
 
     ; Initialize accumulators for this block and set them to 0:
-    xor r12, r12 ; sumB
-    xor r15, r15 ; sumG
-    xor rsi, rsi ; sumR
-    xor rdi, rdi ; sumA
+    vpxor ymm1, ymm1, ymm1    ; Clear accumulator for 2 pixels       
 
-    ; Clear accumulator for 2 pixels
-    vpxor ymm1, ymm1, ymm1            
+    ; Initialize block pixel counter
+    xor rbp, rbp        ; rbp holds count, set to 0 
 
     ; Loop variables for block iteration:
     ;    dy = r10d
@@ -105,12 +96,13 @@ BlockLoopX:
 
     ; 9) Read two pixels from the image data and unpack them to 16-bit values   
     movdqu xmm0, [rcx + rbx]        ; BRGA; 
-    vpmovzxbd ymm0, xmm0            ; Unpack 8-bit to 16-bit, ymm2 = [B0 G0 R0 A0 | B1 G1 R1 A1]
-    vpaddd ymm1, ymm1, ymm0         ; Accumulate 16-bit values, ymm1 += ymm2
+    vpmovzxbd ymm0, xmm0            ; Unpack 8-bit to 32-bit, ymm2 = [B0 G0 R0 A0 | B1 G1 R1 A1]
+    vpaddd ymm1, ymm1, ymm0         ; Accumulate 32-bit values, ymm1 += ymm2
 
+    add rbp, 2          ; Increment pixel counter by 2
 
 SkipPixel:
-    add r11d, 2         ; we are processing 2 pixels at a time
+    add r11d, 2         ; dx += 2 because we are processing 2 pixels at a time
     jmp BlockLoopX
 
 EndBlockX:
@@ -118,6 +110,16 @@ EndBlockX:
     jmp BlockLoopY
 
 EndBlockY:
+    
+	; Check if we have processed any pixels in the block
+    test rbp, rbp       ; if count == 0, skip block
+    jz SkipBlock
+
+    ; Pack pixel count to 16-bit values for division
+    movd xmm4, ebp              ; Move 32-bit count value to xmm3
+    pshufd xmm4, xmm4, 0        ; Broadcast the 32-bit value to all 4 bytes
+    cvtdq2ps xmm4, xmm4         ; Convert 32-bit int to float for division
+
     ; Calculate the average RGBA value for the block
     vmovdqa ymm5, ymm1            ; Copy ymm1 to ymm4 for adding up two pixels from accumulator
     vextracti128 xmm1, ymm1, 1    ; Extract the upper 128 bits of ymm1 into xmm1 | First pixel
@@ -186,12 +188,8 @@ EndLoopX:
 EndLoopY:
     ; Restore registers
     pop rbp
-    pop r15
     pop r14
     pop r13
-    pop r12
-    pop rdi
-    pop rsi
     pop rbx
 
 Exit:
