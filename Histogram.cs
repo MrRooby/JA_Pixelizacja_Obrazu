@@ -8,19 +8,31 @@ using System.Windows.Forms;
 
 namespace JA_Pixelizacja_Obrazu
 {
+    /// <summary>
+    /// Class for calculating and displaying the histogram of an image
+    /// </summary>
     internal class Histogram
     {
+        // Timer for the loading animation
         private Timer loadingTimer;
         private int loadingDots = 0;
+
+        // Label for displaying the loading message
+        private Label loadingLabel;
 
         public Histogram()
         {
             // Initialize the loading timer
             loadingTimer = new Timer();
-            loadingTimer.Interval = 500; // Update every 500 milliseconds
+            loadingTimer.Interval = 500; // Update every 500 milliseconds (add dot evry interval)
             loadingTimer.Tick += LoadingTimer_Tick;
         }
 
+        /// <summary>
+        /// Timer event handler for the loading animation
+        /// </summary>
+        /// <param name="sender">The source of the event</param>
+        /// <param name="e">The event data</param>
         private void LoadingTimer_Tick(object sender, EventArgs e)
         {
             loadingDots = (loadingDots + 1) % 4;
@@ -30,19 +42,25 @@ namespace JA_Pixelizacja_Obrazu
             }
         }
 
-        private Label loadingLabel;
-
+        /// <summary>
+        /// Calculate the histogram of an image
+        /// </summary>
+        /// <param name="image">The image bitmap for which the histogram is to be calculated</param>
+        /// <returns>Returns a 2D array representing the histogram of the image</returns>
         public int[][] CalculateHistogram(Bitmap image)
         {
             int[][] histogram = new int[3][]; // 0: Red, 1: Green, 2: Blue
+            // Initialize the histogram arrays
             histogram[0] = new int[256];
             histogram[1] = new int[256];
             histogram[2] = new int[256];
 
+            // Iterate over all pixels in the image
             for (int y = 0; y < image.Height; y++)
             {
                 for (int x = 0; x < image.Width; x++)
                 {
+                    // For every pixel in the image, increment the corresponding histogram value
                     Color pixelColor = image.GetPixel(x, y);
                     histogram[0][pixelColor.R]++;
                     histogram[1][pixelColor.G]++;
@@ -53,6 +71,11 @@ namespace JA_Pixelizacja_Obrazu
             return histogram;
         }
 
+        /// <summary>
+        /// Create a bitmap image of the histogram
+        /// </summary>
+        /// <param name="histogram">The 2D array representing the histogram of the image</param>
+        /// <returns>Returns a bitmap image representing the histogram</returns>
         public Bitmap HistogramBitmap(int[][] histogram)
         {
             int width = 256;
@@ -82,6 +105,14 @@ namespace JA_Pixelizacja_Obrazu
             return histogramImage;
         }
 
+        /// <summary>
+        /// Get the histogram of an image asynchronously.
+        /// Display it in a PictureBox with a loading animation
+        /// </summary>
+        /// <param name="loadingLabel">The label to display the loading message</param>
+        /// <param name="image">The image for which the histogram is to be calculated</param>
+        /// <param name="control">The control to invoke UI updates</param>
+        /// <param name="pictureBox">The PictureBox to display the histogram</param>
         async public void GetHistogram(Label loadingLabel, Image image, Control control, PictureBox pictureBox)
         {
             this.loadingLabel = loadingLabel;

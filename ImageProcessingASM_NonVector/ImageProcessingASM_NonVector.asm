@@ -1,30 +1,52 @@
+;-------------------------------------------------------------------------------------------;
+;-------------------------------------------------------------------------------------------;
+;  _____ _______   ________ _      _____ ____________   _____ __  __          _____ ______  ;
+; |  __ \_   _\ \ / /  ____| |    |_   _|___  /  ____| |_   _|  \/  |   /\   / ____|  ____| ;
+; | |__) || |  \ V /| |__  | |      | |    / /| |__      | | | \  / |  /  \ | |  __| |__    ;
+; |  ___/ | |   > < |  __| | |      | |   / / |  __|     | | | |\/| | / /\ \| | |_ |  __|   ;
+; | |    _| |_ / . \| |____| |____ _| |_ / /__| |____   _| |_| |  | |/ ____ \ |__| | |____  ;
+; |_|   |_____/_/ \_\______|______|_____/_____|______| |_____|_|  |_/_/    \_\_____|______| ;
+;-------------------------------------------------------------------------------------------;
+;                               STANDARD REGISTER VERSION                                   ;
+;-------------------------------------------------------------------------------------------;
+; Program: PixelizeImage                                                                    ;
+; Version: 1.0                                                                              ;
+; Author: Bartosz Faruga                                                                    ;
+; Description: This procedure pixelizes an image by averaging the pixel values              ;
+;              within blocks of a specified size. The image is processed in                 ;
+;              blocks of size pixelSize x pixelSize. For each block, the                    ;
+;              average color value is computed and assigned to all pixels                   ;
+;              within that block. This results in a pixelated effect where                  ;
+;              details are reduced and the image appears as a mosaic of                     ;
+;              larger colored blocks.                                                       ;
+; Parameters:                                                                               ;
+;  RCX -> imageData ; POINTER to the image 32-bit RGBA pixel data                           ;
+;  RDX -> width     ; INTEGER Width of the image in pixels                                  ; 
+;  R8  -> height    ; INTEGER Height of the image in pixels                                 ;
+;  R9  -> pixelSize ; INTEGER Size of the pixel block for averaging                         ;
+;                                                                                           ;
+; Error Handling:                                                                           ;
+;   - If pixelSize < 1, the procedure exits immediately.                                    ;
+;   - Ensure that width and height are positive integers.                                   ;
+;   - Ensure that imageData is a valid pointer to the image data.                           ;
+;                                                                                           ;
+; ASSUMPTIONS (program does not check if true):                                             ;
+;   - The image data is stored in 32-bit RGBA format.                                       ;
+;                                                                                           ;
+; Technologies Used:                                                                        ;
+;   - Assembly language (x86-64)                                                            ;
+;                                                                                           ;
+;-------------------------------------------------------------------------------------------;
+;-------------------------------------------------------------------------------------------;
+
 .code
-
-; variables:
-    ; r14 - y - outer loop variable
-    ; r13 - x - inner loop variable
-    ; r12 - sumB - accumulator for blue channel
-    ; r15 - sumG - accumulator for green channel
-    ; rsi - sumR - accumulator for red channel
-    ; rdi - sumA - accumulator for alpha channel
-    ; r10 - dy - block row iteration variable
-    ; r11 - dx - block column iteration variable
-    ; rbp - count - number of pixels in the block
-    ; rbx - currentY - current block row
-    ; rax - currentX - current block column
-
-; Parameters:
-    ; RCX -> imageData (pointer to the image pixel data)
-    ; RDX -> width      (int)
-    ; R8  -> height     (int)
-    ; R9  -> pixelSize  (int)
-
 PixelizeImage PROC
-    ; 1) Check if pixelSize < 1, if so exit immediately
-    cmp r9d, 1          ; Compare pixelSize to 1
-    jl Exit             ; Jump to Exit if pixelSize < 1
+    ; Check if pixelSize < 1, if so exit immediately
+    cmp r9d, 1                              ; Compare pixelSize to 1
+    jl Exit                                 ; Jump to Exit if pixelSize < 1
 
-    ; 2) Save registers we will use
+    ; Save registers that will be used throughout the procedure
+    ; so we can restore them before exiting
     push rbx
     push rsi
     push rdi
@@ -34,187 +56,190 @@ PixelizeImage PROC
     push r15
     push rbp
 
-    ; 3) Initialize outer loop variable y -> r14d = 0
-    xor r14d, r14d      ; r14d holds y, set to 0
+    ; Initialize outer loop variable (block row) y -> r14d = 0
+    xor r14d, r14d                          ; r14d holds y, set to 0
 
-    ;set count value to pixelSize^2 for calculating average
-    mov ebp, r9d
-    imul rbp, rbp
-
-OuterLoopY: ; Loop iterates over rows (y) adding pixelSize every iteration of the image until height is reached
+OuterLoopY: ; Loop iterates over rows (y) by adding pixelSize every iteration of the image until height is reached
     ; Compare current y with height (r8d)
-    cmp r14d, r8d       ; y >= height?
-    jge EndLoopY        ; if so, exit outer loop
+    cmp r14d, r8d                           ; have we reached the end of the image?
+    jge EndLoopY                            ; if so, exit outer loop
 
-    ; 4) Initialize x for inner loop -> r13d = 0
-    xor r13d, r13d      ; r13d holds x, set to 0
+    ; Initialize x for inner loop -> r13d = 0
+    xor r13d, r13d                          ; r13d holds x, set to 0
 
 OuterLoopX: ; Loop iterates over columns (x) adding pixelSize every iteration of the image until width is reached
     ; Compare current x with width (edx)
-
-    cmp r13d, edx       ; x >= width?
-    jge EndLoopX        ; if so, exit inner loop
+    cmp r13d, edx                           ; have we reached the end of the row?
+    jge EndLoopX                            ; if so, exit inner loop
 
     ; 5) Initialize accumulators for this block and set them to 0:
-    ;    sumB -> r12
-    ;    sumG -> r15
-    ;    sumR -> rsi
-    ;    sumA -> rdi
+    xor r12, r12                            ; Accumulator for B channel (sumB) 
+    xor r15, r15                            ; Accumulator for G channel (sumG)
+    xor rsi, rsi                            ; Accumulator for R channel (sumR)
+    xor rdi, rdi                            ; Accumulator for A channel (sumA)
 
-    xor r12, r12
-    xor r15, r15
-    xor rsi, rsi
-    xor rdi, rdi
+    ; Initialize the counter for the number of pixels accumulated in the block
+    xor rbp, rbp                            ; rbp holds count, set to 0 
 
-    ; 6) Loop variables for block iteration:
-    ;    dy = r10d
-    ;    dx = r11d
-
-    mov r10d, 0         ; dy = 0
+    ; Loop variables for block iteration:
+    ; dy = r10d - row offset in the block
+    ; dx = r11d - column offset in the block
+    mov r10d, 0                             ; dy = 0
 
 BlockLoopY:
-    ; If dy >= pixelSize -> done with block row
-
-    cmp r10d, r9d
-    jge EndBlockY
+    ; Check if we have reached the end of the block
+    cmp r10d, r9d                           ; if dy >= pixelSize
+    jge EndBlockY                           ; if so, exit block loop
 
     ; Start with dx = 0
-
-    mov r11d, 0         ; dx = 0
+    mov r11d, 0                             ; dx = 0
 
 BlockLoopX:
-    ; If dx >= pixelSize -> done with block column
-    cmp r11d, r9d
-    jge EndBlockX
+    ; Check if we have reached the end of the block
+    cmp r11d, r9d                           ; if dx >= pixelSize
+    jge EndBlockX                           ; if so, exit block loop
 
-    ; 7) Compute currentX = x + dx, currentY = y + dy
+    ; Compute currentX = x + dx, currentY = y + dy
+    lea rax, [r13 + r11]                    ; currentX  - horizontal position in the block
+    cmp rax, rdx                            ; if pixel is out of image width, skip
+    jge SkipPixel
 
-    lea rax, [r13 + r11] ; currentX
-    cmp rax, rdx         ; compare currentX with width
-    jge SkipPixel        ; if out of width, skip
+    lea rbx, [r14 + r10]                    ; currentY - vertical position in the block
+    cmp rbx, r8                             ; if pixel is out of image height, skip
+    jge SkipPixel
 
-    lea rbx, [r14 + r10] ; currentY
-    cmp rbx, r8          ; compare currentY with height
-    jge SkipPixel        ; if out of height, skip
+    ; Calculate pixel index in a 32-bit RGBA format:
+    ; index = (currentY * width + currentX) * 4
+    imul rbx, rdx                           ; rbx = currentY * width
+    add rbx, rax                            ; rbx += currentX
+    shl rbx, 2                              ; multiply by 4 (shift left by 2, faster than imul)
 
-    ; 8) Calculate pixel index in a 32-bit RGBA format:
-    ;    index = (currentY * width + currentX) * 4
+    ; Read the 4 channels (B, G, R, A) from the image memory and accumulate
+    movzx rax, byte ptr [rcx + rbx]         ; read B channel
+    add r12, rax                            ; accumulate B channel
 
-    imul rbx, rdx        ; rbx = currentY * width
-    add rbx, rax         ; rbx += currentX
-    shl rbx, 2           ; multiply by 4 (shift left by 2)
+    movzx rax, byte ptr [rcx + rbx + 1]     ; read G channel
+    add r15, rax                            ; accumulate G channel
 
-    ; 9) Read the 4 channels (B, G, R, A) from the image memory and accumulate
+    movzx rax, byte ptr [rcx + rbx + 2]     ; read R channel
+    add rsi, rax                            ; accumulate R channel                              
 
-    movzx rax, byte ptr [rcx + rbx]      ; B
-    add r12, rax
+    movzx rax, byte ptr [rcx + rbx + 3]     ; read A channel
+    add rdi, rax                            ; accumulate A channel
 
-    movzx rax, byte ptr [rcx + rbx + 1]  ; G
-    add r15, rax
-
-    movzx rax, byte ptr [rcx + rbx + 2]  ; R
-    add rsi, rax
-
-    movzx rax, byte ptr [rcx + rbx + 3]  ; A
-    add rdi, rax
+    inc rbp                                 ; count++
 
 SkipPixel:
-    inc r11d            ; dx++
+    ; Move to the next column in the block
+    inc r11d                                ; dx++
     jmp BlockLoopX
 
 EndBlockX:
-    inc r10d            ; dy++
+    ; Go to the next row in the block
+    inc r10d                                ; dy++
     jmp BlockLoopY
 
 EndBlockY:
-    ; 11) Compute the average B, G, R, A
+	; Check if we have processed any pixels in the block
+    test rbp, rbp                           ; if count == 0, skip block
+    jz SkipBlock
 
-    ; We use 8-bit for each average, so we divide sum by count and store AL
+    ; saving rdx register because cdq instruction overrides it
+    ; and we will need its value later
+    push rdx
 
-    push rdx ; saving rdx register because cdq instruction overrides it and we need it later
+    ; Calculate the average color values for the block
+    ; Blue channel
+    xor rax, rax                            ; clear rax register
+    mov eax, r12d                           ; put sumB into eax
+    cdq                                     ; sign extend for division 
+                                            ; eax -> stores quotient, edx -> stores remainder 
+    idiv rbp                                ; divide value by count of pixels in the block
+    movzx r12d, al                          ; put averaged value back into r12d
 
-    xor rax, rax
-    mov eax, r12d       ; sumB
-    cdq                 ; sign extend
-    idiv rbp            ; divide by count
-    movzx r12d, al      ; r12d = avgB
+    ; Green channel
+    xor rax, rax                            ; clear rax register
+    mov eax, r15d                           ; put sumG into eax
+    cdq                                     ; sign extend for division 
+                                            ; eax -> stores quotient, edx -> stores remainder 
+    idiv rbp                                ; divide value by count of pixels in the block
+    movzx r15d, al                          ; put averaged value back into r15d
 
-    xor rax, rax
-    mov eax, r15d       ; sumG
-    cdq
-    idiv rbp
-    movzx r15d, al      ; r15d = avgG
+    ; Red channel
+    xor rax, rax                            ; clear rax register
+    mov eax, esi                            ; put sumR into eax
+    cdq                                     ; sign extend for division 
+                                            ; eax -> stores quotient, edx -> stores remainder 
+    idiv rbp                                ; divide value by count of pixels in the block
+    movzx rsi, al                           ; put averaged value back into rsi
 
-    xor rax, rax
-    mov eax, esi        ; sumR
-    cdq
-    idiv rbp
-    movzx rsi, al       ; rsi = avgR
+    ; Alpha channel
+    xor rax, rax                            ; clear rax register
+    mov eax, edi                            ; put sumA into eax
+    cdq                                     ; sign extend for division 
+                                            ; eax -> stores quotient, edx -> stores remainder 
+    idiv rbp                                ; divide value by count of pixels in the block
+    movzx rdi, al                           ; put averaged value back into rdi
 
-    xor rax, rax
-    mov eax, edi        ; sumA
-    cdq
-    idiv rbp
-    movzx rdi, al       ; rdi = avgA
-
-    pop rdx ; restoring rdx register after average calculation
+    pop rdx                                 ; restoring rdx register after average calculation
 
     ; Write the average to all pixels in the block
-    mov r10d, 0         ; dy = 0
+    mov r10d, 0                             ; dy = 0 - set dy for the beginning of the block
 
 WriteBlockY:
-    cmp r10d, r9d       ; if dy >= pixelSize, exit write loop
+    cmp r10d, r9d                           ; if reached the end of the block, exit write loop
     jge EndWriteY
 
-    mov r11d, 0         ; dx = 0
+    mov r11d, 0                             ; dx = 0 - set dx for the beginning of the block
 
 WriteBlockX:
-    cmp r11d, r9d       ; if dx >= pixelSize, exit write loop
+    cmp r11d, r9d                           ; if reached the end of the block, exit write loop
     jge EndWriteX
 
     ; Compute currentX = x + dx, currentY = y + dy
-    lea rax, [r13 + r11] ; currentX
-    cmp eax, edx         ; currentX >= width?
+    lea rax, [r13 + r11]                    ; currentX - horizontal position in the block
+    cmp eax, edx                            ; if pixel is out of image width, skip
     jge SkipWrite
 
-    lea rbx, [r14 + r10] ; currentY
-    cmp ebx, r8d         ; currentY >= height?
+    lea rbx, [r14 + r10]                    ; currentY - vertical position in the block
+    cmp ebx, r8d                            ; if pixel is out of image height, skip
     jge SkipWrite
 
     ; Calculate pixel index in 32-bit RGBA format
-    imul rbx, rdx        ; rbx = currentY * width
-    add rbx, rax         ; rbx += currentX
-    shl rbx, 2           ; multiply by 4 (shift left by 2)
+    imul rbx, rdx                           ; rbx = currentY * width
+    add rbx, rax                            ; rbx += currentX
+    shl rbx, 2                              ; multiply by 4 (shift left by 2, faster than imul)
 
     ; Write average values back to the pixel
-    mov byte ptr [rcx + rbx], r12b      ; B
-    mov byte ptr [rcx + rbx + 1], r15b  ; G
-    mov byte ptr [rcx + rbx + 2], sil   ; R
-    mov byte ptr [rcx + rbx + 3], dil   ; A
+    mov byte ptr [rcx + rbx], r12b          ; B
+    mov byte ptr [rcx + rbx + 1], r15b      ; G
+    mov byte ptr [rcx + rbx + 2], sil       ; R
+    mov byte ptr [rcx + rbx + 3], dil       ; A
 
 SkipWrite:
-    inc r11d            ; dx++
+    inc r11d                                ; dx++
     jmp WriteBlockX
 
 EndWriteX:
-    inc r10d            ; dy++
+    inc r10d                                ; dy++
     jmp WriteBlockY
 
 EndWriteY:
     ; Continue to the next block in the outer loop
-    add r13d, r9d       ; x += pixelSize
-    jmp OuterLoopX      ; repeat for the next column
+    add r13d, r9d                           ; x += pixelSize - set x for the start of the next block
+    jmp OuterLoopX                          ; repeat the process for the next column
 
 SkipBlock:
-    add r13d, r9d       ; x += pixelSize
-    jmp OuterLoopX
+    ; Skip the block if no pixels were processed
+    add r13d, r9d                           ; x += pixelSize - set x for the start of the next block
+    jmp OuterLoopX                          ; repeat the process for the next column
 
 EndLoopX:
-    add r14d, r9d       ; y += pixelSize
-    jmp OuterLoopY
+    add r14d, r9d                           ; y += pixelSize - set y for the start of the next block
+    jmp OuterLoopY                          ; repeat the process for the next row
 
 EndLoopY:
-    ; 12) Restore registers
+    ; Restore registers we were using back to their original values from the stack
     pop rbp
     pop r15
     pop r14
@@ -225,7 +250,8 @@ EndLoopY:
     pop rbx
 
 Exit:
-    ; 13) Return to caller
+    ; Return to caller
     ret
+    
 PixelizeImage ENDP
 end

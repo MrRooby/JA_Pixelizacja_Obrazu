@@ -21,9 +21,15 @@ namespace JA_Pixelizacja_Obrazu
         public ImageProcessorForm()
         {
             InitializeComponent();
+
             // Disable the maximize button and disable resizing
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
+            threadsTrackBar.Value = Environment.ProcessorCount;         // Set the default value of the threads trackbar to the number of logical processors
+            threadValueLabel.Text = threadsTrackBar.Value.ToString();   // Display the value selected on the trackbar
+            
+            // Set the form icon
+            this.Icon = new Icon("Resources/icon.ico");
         }
 
         /// <summary>
@@ -31,7 +37,7 @@ namespace JA_Pixelizacja_Obrazu
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        async private void BrowseFiles_ButtonClick(object sender, EventArgs e)
+        private void BrowseFiles_ButtonClick(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Title = "Select an image";
@@ -60,12 +66,11 @@ namespace JA_Pixelizacja_Obrazu
         /// <param name="e"></param>
         private void Threads_TrackBarScroll(object sender, EventArgs e)
         {
-            threadValueLabel.Text = threadsTrackBar.Value.ToString(); // Display the value selected on the trackbar
+            threadValueLabel.Text = threadsTrackBar.Value.ToString(); // Update the label with the value selected on the trackbar
         }
 
-
         /// <summary>
-        /// Process the image
+        /// Start the image processing with the selected parameters (pixel number, threads, library, crop)
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -82,16 +87,21 @@ namespace JA_Pixelizacja_Obrazu
                 return;
             }
 
+            // Check if a processing library is selected
+            if (string.IsNullOrEmpty(libraryPicker.Text))
+            {
+                MessageBox.Show("Please select a processing library");
+                return;
+            }
+
             try
             {
+                // Process the image
                 imageProcessing.LoadImage(filePathTextBox.Text);
-
-                // Choose the processing library
                 imageProcessing.ChooseProcessingLibrary(libraryPicker.Text.ToString());
-
                 processedImage = imageProcessing.ProcessImage(Int32.Parse(pixelNumPicker.Text), threadsTrackBar.Value, CropImageCheckbox.Checked);
 
-                // Display the processed image
+                // Display the processed image in the PictureBox
                 PictureBoxProcessed.SizeMode = PictureBoxSizeMode.Zoom;
                 PictureBoxProcessed.Image = processedImage;
             }
@@ -103,25 +113,32 @@ namespace JA_Pixelizacja_Obrazu
             {
                 if (processedImage != null)
                 {
-                    // Display the histogram
+                    // Display the histogram for the processed image
+                    // This operation is done first because it takes the longest (time depends on the image size)
                     Histogram histogram = new Histogram();
                     histogram.GetHistogram(LoadingLabelProcessed, processedImage, this, PictureBoxHistogramProcessed);
 
                     // Display the elapsed time
                     MessageBox.Show($"Processing time: {imageProcessing.elapsedMilliseconds} ms");
 
-                    // Save window
+                    // Display a message box asking if the user wants to save the processed image
                     DialogResult result = MessageBox.Show("Do you want to save the processed image?", "Save Image", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
                         SaveFileDialog saveFileDialog = new SaveFileDialog();
                         saveFileDialog.Title = "Save processed image";
-                        saveFileDialog.Filter = "JPEG Image|*.jpg";
-                        saveFileDialog.FileName = "processed.jpg";
+                        saveFileDialog.Filter = "JPEG Image|*.jpg|PNG Image|*.png";
                         if (saveFileDialog.ShowDialog() == DialogResult.OK)
                         {
-                            processedImage.Save(saveFileDialog.FileName, ImageFormat.Jpeg);
-                            MessageBox.Show("Image saved successfully");
+                            try
+                            {
+                                processedImage.Save(saveFileDialog.FileName, ImageFormat.Jpeg);
+                                MessageBox.Show("Image saved successfully");
+                            }
+                            catch
+                            {
+                                MessageBox.Show($"Did not save! Cannot override the original image!");
+                            }
                         }
                     }
                 }

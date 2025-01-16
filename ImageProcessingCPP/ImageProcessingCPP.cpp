@@ -4,16 +4,16 @@
 
 extern "C"
 {
-    // Exported function for pixelizing an image
     __declspec(dllexport) void PixelizeImage(
-        unsigned char* imageData, // Pointer to the image pixel data
-        int width,                // Width of the image in pixels
-        int height,               // Height of the image in pixels
-        int pixelSize)            // Size of the pixelization block (e.g., 10 for 10x10)
+        unsigned char* imageData,
+        int width,
+        int height,
+        int pixelSize)
     {
-        if (pixelSize < 1) return; // Invalid pixel size
-        //int count = pixelSize * pixelSize; // Number of pixels in the block
+        if (pixelSize < 1) return; // Cannot procede if pixelSize is less than 1
+
         int count = 0;
+
         // Iterate over the image in blocks of pixelSize x pixelSize
         for (int y = 0; y < height; y += pixelSize)
         {
@@ -28,6 +28,7 @@ extern "C"
                 {
                     for (int dx = 0; dx < pixelSize; dx++)
                     {
+                        // Calculate the current pixel position in the image
                         int currentX = x + dx;
                         int currentY = y + dy;
 
@@ -35,7 +36,7 @@ extern "C"
                         if (currentX >= width || currentY >= height)
                             continue;
 
-                        int index = (currentY * width + currentX) * 4; // Calculate index for RGBA
+                        int index = (currentY * width + currentX) * 4; // Calculate index for RGBA image array
 
                         // Accumulate the color components
                         sumB += imageData[index + 0];
@@ -47,7 +48,7 @@ extern "C"
                     }
                 }
 
-                // Calculate average color components
+                // Calculate average color components for the block
                 unsigned char avgB = static_cast<unsigned char>(sumB / count);
                 unsigned char avgG = static_cast<unsigned char>(sumG / count);
                 unsigned char avgR = static_cast<unsigned char>(sumR / count);
@@ -65,7 +66,7 @@ extern "C"
                         if (currentX >= width || currentY >= height)
                             continue;
 
-                        int index = (currentY * width + currentX) * 4; // Calculate index for RGBA
+                        int index = (currentY * width + currentX) * 4; // Calculate index for RGBA image array
 
                         // Assign the average color to the current pixel
                         imageData[index + 0] = avgB;

@@ -11,23 +11,37 @@ namespace JA_Pixelizacja_Obrazu
     /// Delegate for the pixelization library functions. 
     /// The delegate is used to call the pixelization functions from the C++ and ASM libraries.
     /// </summary>
-    /// <param name="imageData"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
-    /// <param name="pixelSize"></param>
+    /// <param name="imageData">The image data to be pixelized. Must be in a 32-bit RGBA format</param>
+    /// <param name="width">The width of the image. Value must be divisible by 4</param>
+    /// <param name="height">The height of the image. Value must be divisible by 4</param>
+    /// <param name="pixelSize">The size of the pixel blocks. Value must be divisible by 4</param>
     public delegate void PixelizeLibraryDelegate(
-            byte[] imageData,         // Pointer to the image pixel data
-            int width,                // Width of the image in pixels
-            int height,               // Height of the image in pixels
-            int pixelSize);           // Size of the pixelization block (e.g., 10 for 10x10)
+            byte[] imageData,
+            int width,
+            int height,
+            int pixelSize);
 
     /// <summary>
     /// Class containing the C++ library functions for pixelization.
     /// </summary>
     public static class CPPLibrary
     {
-        [DllImport("ImageProcessingCPP.dll",
+        [DllImport("Lib/ImageProcessingCPP.dll",
             CallingConvention = CallingConvention.Cdecl)]
+        public static extern void PixelizeImage(
+            byte[] imageData,
+            int width,
+            int height,
+            int pixelSize);
+    }
+
+    /// <summary>
+    /// Class containing the ASM library functions for pixelization. Contains SIMD operations
+    /// </summary>
+    public static class ASMLibrary
+    {
+        [DllImport("Lib/ImageProcessingASM.dll",
+            CallingConvention = CallingConvention.StdCall)]
         public static extern void PixelizeImage(
             byte[] imageData,
             int width,
@@ -38,20 +52,9 @@ namespace JA_Pixelizacja_Obrazu
     /// <summary>
     /// Class containing the ASM library functions for pixelization.
     /// </summary>
-    public static class ASMLibrary
-    {
-        [DllImport("ImageProcessingASM.dll",
-            CallingConvention = CallingConvention.StdCall)]
-        public static extern void PixelizeImage(
-            byte[] imageData,
-            int width,
-            int height,
-            int pixelSize);
-    }
-
     public static class ASM_NonVectorLibrary
     {
-        [DllImport("ImageProcessingASM_NonVector.dll",
+        [DllImport("Lib/ImageProcessingASM_NonVector.dll",
             CallingConvention = CallingConvention.StdCall)]
         public static extern void PixelizeImage(
             byte[] imageData,

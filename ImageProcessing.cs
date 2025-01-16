@@ -31,7 +31,7 @@ namespace JA_Pixelizacja_Obrazu
         /// <summary>
         /// Sets the processing library to be used for pixelizing the image.
         /// </summary>
-        /// <param name="choice"> ASM or C++  </param>
+        /// <param name="choice"> ASM, C++ or ASM SIMD </param>
         /// 
         public void ChooseProcessingLibrary(String choice)
         {
@@ -76,40 +76,13 @@ namespace JA_Pixelizacja_Obrazu
         }
 
         /// <summary>
-        /// Calculates the greatest common divisor of two numbers.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns> GCD of two numbers </returns>
-        private int GCD(int a, int b)
-        {
-            while (b != 0)
-            {
-                int temp = b;
-                b = a % b;
-                a = temp;
-            }
-            return a;
-        }
-
-        /// <summary>
-        /// Calculates the least common multiple of two numbers.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <returns> LCM of two numbers </returns>
-        private int LCM(int a, int b)
-        {
-            return a * b / GCD(a, b);
-        }
-
-        /// <summary>
         /// Calculates the area for the image so the pixel count
         /// is divisible by the pixel size and thread count.
         /// </summary>
         /// <param name="originalBitmap"> image for which to calculate the area</param>
         /// <param name="pixelSize"> how many pixel will be averaged</param>
         /// <param name="threadCount"> count of threads the operation will be performed</param>
+        /// <param name="squarePixels"> if true, the image will be cropped to consist of only square pixels</param>
         /// <returns> Rectangle divisible by pixelSize and threadCount</returns>
         Rectangle AreaForProcessing(Bitmap originalBitmap, int pixelSize, bool squarePixels)
         {
@@ -138,7 +111,7 @@ namespace JA_Pixelizacja_Obrazu
         /// Cropps the image according to the specified area.
         /// </summary>
         /// <param name="cropArea"> size of the returned image</param>
-        /// <returns> cropped image </returns>
+        /// <returns> Cropped bitmap image </returns>
         /// <exception cref="Exception"> Thrown if <paramref name="cropArea"/> exceeds the current image size</exception>
         private unsafe Bitmap CroppedBitmapForProcessing(Rectangle cropArea)
         {
@@ -185,28 +158,28 @@ namespace JA_Pixelizacja_Obrazu
         /// <summary>
         /// Processes the image using the specified pixel size and thread count.
         /// </summary>
-        /// <param name="pixelSize"> size of area to average</param>
-        /// <param name="threadCount"> number of threads operation will be performed on</param>
-        /// <param name="squarePixels"> if true, the image will be cropped to consist of only square pixels</param> -->-->
+        /// <param name="pixelSize"> size of area to average, must be at least 4</param>
+        /// <param name="threadCount"> number of threads operation will be performed on, must be at least 1</param>
+        /// <param name="squarePixels"> if true, the image will be cropped to consist of only square pixels</param>
         /// <returns> Processed image </returns>
-        /// <exception cref="ArgumentException"> 
-        /// Throw if <paramref name="pixelSize"/> 
-        /// or <paramref name="threadCount"/> 
-        /// is less than 1</exception>
+        /// <exception cref="ArgumentException"> Thrown if <paramref name="pixelSize"/> is less than 4 or <paramref name="threadCount"/> is less than 1</exception>
         public Bitmap ProcessImage(int pixelSize, int threadCount, bool squarePixels)
         {
+            if (threadCount <= 0)
+                throw new ArgumentException("Number of threads must be greater than 0");
+            if (pixelSize <= 1)
+                throw new ArgumentException("Pixel size must be greater than 0");
+            
+            // Stopwatch for measuring the time of processing
             Stopwatch stopwatch = new Stopwatch();
 
             // Transform image size for processing (must be divisible by 4 because asm library takes in 4 pixels at a time)
             Rectangle cropArea = AreaForProcessing(imageBitmap, pixelSize, squarePixels);
 
-            // Create a copy of the loaded image
+            // Create a copy of the loaded image. MUST BE 32bit RGBA format
             Bitmap bitmap = new Bitmap(CroppedBitmapForProcessing(cropArea));
             Rectangle rect = new Rectangle(0, 0, bitmap.Width, bitmap.Height);
-            BitmapData bmpData = bitmap.LockBits(
-                rect,
-                ImageLockMode.ReadWrite,
-                PixelFormat.Format32bppArgb);
+            BitmapData bmpData = bitmap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb); 
 
             int width = bitmap.Width;
             int height = bitmap.Height;
@@ -218,22 +191,25 @@ namespace JA_Pixelizacja_Obrazu
             byte[] data = new byte[bytes];
             Marshal.Copy(bmpData.Scan0, data, 0, bytes);
 
-
             // Create threads for processing
             Thread[] threads = new Thread[threadCount];
 
+            // Calculate the number of blocks and the remaining pixels
             int numOfBlocks = height / pixelSize;
             float leftOver = height % pixelSize;
 
+            // Calculate the number of rows per thread
             int rowsPerThread = (height / threadCount / pixelSize) * pixelSize;
             if (rowsPerThread <= 0)
                 throw new ArgumentException("Number of threads is too high for the image size");
             int remainingRows = height - (rowsPerThread * (threadCount - 1));
 
+            // Stopwatch started before the entire process consisting of both the image processing and the thread creation
             stopwatch.Start();
 
             for (int t = 0; t < threadCount; t++)
             {
+                // Calculate the start and end row for the thread
                 int startRow = t * rowsPerThread;
                 int endRow = (t == threadCount - 1) ? height : startRow + rowsPerThread;
 
@@ -246,11 +222,14 @@ namespace JA_Pixelizacja_Obrazu
                     int localEnd = endRow;
                     int localHeight = localEnd - localStart;
 
+                    // Create a local copy of the image data
                     byte[] image = new byte[localHeight * stride];
                     Buffer.BlockCopy(data, localStart * stride, image, 0, localHeight * stride);
 
+                    // Process the part of the image
                     processingLibrary(image, width, localHeight, pixelSize);
 
+                    // Copy the processed image back to the data array
                     Buffer.BlockCopy(image, 0, data, localStart * stride, localHeight * stride);
                 });
 
@@ -258,14 +237,17 @@ namespace JA_Pixelizacja_Obrazu
                 threads[t].Start();
             }
 
+            // Wait for all threads to finish
             foreach (Thread thread in threads)
             {
                 thread.Join();
             }
 
+            // Stopwatch stopped after the entire process consisting of both the image processing and the thread creation
             stopwatch.Stop();
             elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
 
+            // Copy the processed data back to the bitmap
             Marshal.Copy(data, 0, bmpData.Scan0, bytes);
             bitmap.UnlockBits(bmpData);
 
