@@ -118,7 +118,7 @@ BlockLoopX:
     movdqu xmm0, [rcx + rbx]    ; insert 4 BRGA values to register; 
     vpmovzxbd ymm0, xmm0        ; Unpack 8-bit to 32-bit, ymm2 = [B0 G0 R0 A0 | B1 G1 R1 A1]
     vpaddd ymm1, ymm1, ymm0     ; Accumulate 32-bit values, ymm1 += ymm2
-
+    
     add rbp, 2                  ; Increment pixel counter by 2 (we are processing 2 pixels at a time)
 
 SkipPixel:
