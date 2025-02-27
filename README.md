@@ -1,4 +1,4 @@
-# Image Pixelization
+  # Image Pixelization
 
 ## Overview
 
@@ -50,14 +50,19 @@ A delegate in C# that defines the signature for the pixelization functions. It a
 
 ## Program GUI
 
+![image](https://github.com/user-attachments/assets/b4485e1f-418a-4119-a8d5-05d4560128f7)
 
 
 ## Processed Images Example
 
 ### Original 4k Image
+![pexels-francesco-ungaro-1525041(1)](https://github.com/user-attachments/assets/4a4229d1-4a71-46ea-b15e-1e0dffc928c0)
 
-### 32x pixelization
+### 64x pixelization
+![64x](https://github.com/user-attachments/assets/29d28cc2-9a1e-47a5-9fc9-7d3ba0761527)
 
-### 128x pixelization
+### 256x pixelization
+![256x](https://github.com/user-attachments/assets/b5cd4415-924f-41d5-97ce-0791e689678a)
 
 ### 1024x pixelization
+![1024x](https://github.com/user-attachments/assets/1458668c-559d-47dd-b8b2-f3573dc53594)
